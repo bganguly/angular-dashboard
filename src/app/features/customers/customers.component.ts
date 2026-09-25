@@ -36,7 +36,7 @@ import { DataTableComponent, TableColumn } from '@angular-dashboard/ui';
         <tr *ngFor="let c of customers()" tabindex="0">
           <td>{{ c.id }}</td>
           <td>{{ c.firstName }} {{ c.lastName }}</td>
-          <td><a [href]="'mailto:' + c.email" aria-label="Email {{ c.firstName }}">{{ c.email }}</a></td>
+          <td><a [href]="'mailto:' + c.email" [attr.aria-label]="'Email ' + c.firstName">{{ c.email }}</a></td>
           <td>{{ c.phone ?? '—' }}</td>
           <td>{{ c.region.name }}</td>
           <td>{{ c.createdAt | date:'mediumDate' }}</td>

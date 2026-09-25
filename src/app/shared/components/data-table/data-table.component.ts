@@ -58,21 +58,21 @@ export interface TableColumn<T> {
   `],
 })
 export class DataTableComponent {
-  @Input({ required: true }) columns!: TableColumn<unknown>[];
-  @Input() rows: unknown[] = [];
+  @Input({ required: true }) columns!: TableColumn<any>[];
+  @Input() rows: any[] = [];
   @Input() loading = false;
   @Input() caption?: string;
   @Input() sortKey?: string;
   @Input() sortDir?: 'asc' | 'desc';
   @Output() sortChange = new EventEmitter<{ key: string; dir: 'asc' | 'desc' }>();
 
-  onSort(col: TableColumn<unknown>): void {
+  onSort(col: TableColumn<any>): void {
     const newDir: 'asc' | 'desc' =
       this.sortKey === col.key && this.sortDir === 'desc' ? 'asc' : 'desc';
     this.sortChange.emit({ key: col.key as string, dir: newDir });
   }
 
-  ariaSortFor(col: TableColumn<unknown>): string {
+  ariaSortFor(col: TableColumn<any>): string {
     if (this.sortKey !== col.key) return 'none';
     return this.sortDir === 'asc' ? 'ascending' : 'descending';
   }
