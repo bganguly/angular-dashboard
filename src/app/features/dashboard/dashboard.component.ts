@@ -53,40 +53,40 @@ const FIELD_CLS = 'w-full rounded-md border border-gray-300 bg-white px-2 py-1.5
   styles: [`
     .brush-range {
       position: absolute;
-      top: -6px;
+      top: 0;
       left: 0;
       width: 100%;
+      height: 32px;
       pointer-events: none;
       background: transparent;
       -webkit-appearance: none;
       appearance: none;
-      height: 14px;
       margin: 0;
     }
     .brush-range::-webkit-slider-thumb {
       pointer-events: all;
       -webkit-appearance: none;
       appearance: none;
-      height: 14px;
-      width: 14px;
+      height: 22px;
+      width: 22px;
       border-radius: 50%;
       background: #6366f1;
       cursor: ew-resize;
-      border: 2px solid white;
-      box-shadow: 0 0 0 1px rgba(99,102,241,0.5);
+      border: 3px solid white;
+      box-shadow: 0 0 0 2px rgba(99,102,241,0.4), 0 1px 4px rgba(0,0,0,0.2);
     }
     .brush-range::-moz-range-thumb {
       pointer-events: all;
-      height: 14px;
-      width: 14px;
+      height: 22px;
+      width: 22px;
       border-radius: 50%;
       background: #6366f1;
       cursor: ew-resize;
-      border: 2px solid white;
-      box-shadow: 0 0 0 1px rgba(99,102,241,0.5);
+      border: 3px solid white;
+      box-shadow: 0 0 0 2px rgba(99,102,241,0.4), 0 1px 4px rgba(0,0,0,0.2);
     }
     .brush-range::-webkit-slider-runnable-track { background: transparent; }
-    .brush-range::-moz-range-track { background: transparent; }
+    .brush-range::-moz-range-track { background: transparent; height: 0; }
   `],
   template: `
 <main id="main-content" class="w-full px-5 py-8" aria-label="Dashboard">
@@ -339,20 +339,23 @@ const FIELD_CLS = 'w-full rounded-md border border-gray-300 bg-white px-2 py-1.5
 
         <!-- Brush slider -->
         <div *ngIf="allBucketsCount() > 1" class="mt-4 px-1">
-          <div class="relative h-1 rounded-full bg-gray-200 dark:bg-gray-700">
-            <div class="absolute h-full rounded-full bg-indigo-500"
-                 [style.left.%]="brushStartPct()"
-                 [style.width.%]="brushEndPct() - brushStartPct()"></div>
+          <div class="relative h-8">
+            <div class="absolute inset-x-0 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700"
+                 style="top:50%;transform:translateY(-50%)">
+              <div class="absolute h-full rounded-full bg-indigo-500"
+                   [style.left.%]="brushStartPct()"
+                   [style.width.%]="brushEndPct() - brushStartPct()"></div>
+            </div>
+            <input type="range" class="brush-range"
+                   [min]="0" [max]="allBucketsCount() - 1" [value]="brushStart()"
+                   (input)="onBrushStart($event)" (change)="commitBrush()"
+                   aria-label="Chart range start" />
+            <input type="range" class="brush-range"
+                   [min]="0" [max]="allBucketsCount() - 1" [value]="brushEnd()"
+                   (input)="onBrushEnd($event)" (change)="commitBrush()"
+                   aria-label="Chart range end" />
           </div>
-          <input type="range" class="brush-range"
-                 [min]="0" [max]="allBucketsCount() - 1" [value]="brushStart()"
-                 (input)="onBrushStart($event)" (change)="commitBrush()"
-                 aria-label="Chart range start" />
-          <input type="range" class="brush-range"
-                 [min]="0" [max]="allBucketsCount() - 1" [value]="brushEnd()"
-                 (input)="onBrushEnd($event)" (change)="commitBrush()"
-                 aria-label="Chart range end" />
-          <div class="mt-2 flex justify-between text-[11px] text-gray-400 dark:text-gray-500">
+          <div class="mt-1 flex justify-between text-[11px] text-gray-400 dark:text-gray-500">
             <span>{{ brushStartDate() }}</span>
             <span class="italic opacity-60">drag to zoom · releases update orders</span>
             <span>{{ brushEndDate() }}</span>
