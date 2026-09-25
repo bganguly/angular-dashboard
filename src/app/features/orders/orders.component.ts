@@ -81,6 +81,8 @@ const SELECT_CLS = 'rounded-md border border-gray-300 bg-white px-2 py-1.5 text-
             <td class="px-3 py-2 align-top text-right tabular-nums text-gray-900 dark:text-gray-100">{{ order.total | currency }}</td>
             <td class="px-3 py-2 align-top text-gray-700 dark:text-gray-300">{{ order.region.name }}</td>
             <td class="px-3 py-2 align-top text-gray-700 dark:text-gray-300">{{ order.placedAt | date:'mediumDate' }}</td>
+            <td class="px-3 py-2 align-top max-w-[180px] truncate text-gray-500 dark:text-gray-400"
+                [title]="order.notes ?? ''">{{ order.notes ?? '—' }}</td>
           </tr>
         </app-data-table>
       </section>
@@ -138,6 +140,7 @@ export class OrdersComponent implements OnInit {
     { key: 'total',     label: 'Total',     sortable: true, class: 'text-right' },
     { key: 'region',    label: 'Region',    sortable: false },
     { key: 'placedAt',  label: 'Date',      sortable: true },
+    { key: 'notes',     label: 'Notes',     sortable: false },
   ];
 
   ngOnInit(): void {

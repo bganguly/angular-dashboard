@@ -8,7 +8,10 @@ import { KpiCardComponent } from '@angular-dashboard/ui';
 
 Chart.register(...registerables);
 
-const PALETTE = ['#4f46e5','#7c3aed','#059669','#d97706','#dc2626','#0891b2','#ca8a04'];
+const TOP_N = 4;
+const OTHER_KEY = 'Others';
+const OTHER_COLOR = '#94a3b8';
+const PALETTE = ['#4f46e5', '#7c3aed', '#059669', '#d97706', '#dc2626', '#0891b2', '#ca8a04'];
 
 const INPUT_CLS = 'rounded-md border border-gray-300 bg-white px-2 py-1.5 text-sm text-gray-900 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100';
 
@@ -46,7 +49,15 @@ const INPUT_CLS = 'rounded-md border border-gray-300 bg-white px-2 py-1.5 text-s
 
       <section class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900"
                aria-label="Daily revenue by category">
-        <h2 class="text-base font-semibold mb-4 text-gray-900 dark:text-gray-50">Daily Revenue by Category</h2>
+        <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <h2 class="text-base font-semibold text-gray-900 dark:text-gray-50">Daily Revenue by Category</h2>
+          <label *ngIf="hasOthers()" class="inline-flex cursor-pointer items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400 select-none">
+            <input type="checkbox" [checked]="showOthers()" (change)="toggleOthers()"
+                   class="h-3.5 w-3.5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                   aria-label="Show others bar series" />
+            Show others
+          </label>
+        </div>
         <div *ngIf="loading()" class="flex justify-center py-10" aria-live="polite">
           <span class="h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-indigo-500 dark:border-gray-700 dark:border-t-indigo-400"
                 role="status" aria-label="Loading chart data"></span>
@@ -73,8 +84,15 @@ export class DashboardComponent implements OnInit {
 
   readonly inputCls = INPUT_CLS;
   readonly loading = signal(false);
+  readonly showOthers = signal(false);
+  readonly hasOthers = signal(false);
+
   private readonly aggData = signal<DailyAggregate[]>([]);
   private readonly rawTotal = signal(0);
+
+  private cachedLabels: string[] = [];
+  private cachedTopDatasets: any[] = [];
+  private cachedOthersDataset: any = null;
 
   readonly rangeForm = this.fb.group({
     from: [this.defaultFrom()],
@@ -118,15 +136,52 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  toggleOthers(): void {
+    this.showOthers.update((v) => !v);
+    this.rebuildChartData();
+  }
+
   private buildChart(data: DailyAggregate[]): void {
-    const labels = data.map((d) => d.date);
-    const cats = [...new Set(data.flatMap((d) => Object.keys(d.categories)))];
-    const datasets = cats.map((cat, i) => ({
+    const totals = new Map<string, number>();
+    for (const day of data) {
+      for (const [cat, c] of Object.entries(day.categories)) {
+        totals.set(cat, (totals.get(cat) ?? 0) + (c.totalRevenue ?? 0));
+      }
+    }
+
+    const sorted = [...totals.entries()].sort((a, b) => b[1] - a[1]);
+    const topCats = sorted.slice(0, TOP_N).map(([cat]) => cat);
+    const topSet = new Set(topCats);
+    const hasOthers = sorted.length > TOP_N;
+
+    this.hasOthers.set(hasOthers);
+    this.cachedLabels = data.map((d) => d.date);
+
+    this.cachedTopDatasets = topCats.map((cat, i) => ({
       label: cat,
       data: data.map((d) => d.categories[cat]?.totalRevenue ?? 0),
       backgroundColor: PALETTE[i % PALETTE.length],
     }));
-    this.chartData = { labels, datasets };
+
+    this.cachedOthersDataset = hasOthers ? {
+      label: OTHER_KEY,
+      data: data.map((d) =>
+        Object.entries(d.categories)
+          .filter(([cat]) => !topSet.has(cat))
+          .reduce((s, [, c]) => s + (c.totalRevenue ?? 0), 0)
+      ),
+      backgroundColor: OTHER_COLOR,
+    } : null;
+
+    this.rebuildChartData();
+  }
+
+  private rebuildChartData(): void {
+    const datasets = [...this.cachedTopDatasets];
+    if (this.cachedOthersDataset && this.showOthers()) {
+      datasets.push(this.cachedOthersDataset);
+    }
+    this.chartData = { labels: this.cachedLabels, datasets };
   }
 
   private defaultFrom(): string {
