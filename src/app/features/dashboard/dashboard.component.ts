@@ -331,7 +331,7 @@ const FIELD_CLS = 'w-full rounded-md border border-gray-300 bg-white px-2 py-1.5
                    class="h-3.5 w-3.5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                    aria-label="Show others bar series" />
             Others
-            <span *ngIf="othersTotal() !== null" class="font-medium tabular-nums text-gray-900 dark:text-gray-100">
+            <span *ngIf="showOthers() && othersTotal() !== null" class="font-medium tabular-nums text-gray-900 dark:text-gray-100">
               {{ othersTotal() | number }}
             </span>
           </label>
