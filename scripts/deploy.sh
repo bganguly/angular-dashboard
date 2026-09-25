@@ -118,6 +118,17 @@ if [[ -z "${BACKEND_URL:-}" ]]; then
   exit 1
 fi
 
+printf '\n=== registering Azure resource providers (idempotent) ===\n'
+for _ns in Microsoft.App Microsoft.ContainerRegistry Microsoft.OperationalInsights; do
+  _state=$(az provider show --namespace "$_ns" --query registrationState -o tsv 2>/dev/null || true)
+  if [[ "$_state" != "Registered" ]]; then
+    printf '  Registering %s…\n' "$_ns"
+    az provider register --namespace "$_ns" --wait
+  else
+    printf '  %s already registered.\n' "$_ns"
+  fi
+done
+
 cd "$INFRA_DIR"
 terraform init -input=false
 
