@@ -44,12 +44,17 @@ fi
 # AZURE
 # ──────────────────────────────────────────────────────────────────────────────
 if ! command -v az >/dev/null 2>&1; then
-  printf '\naz CLI not found.\n'
-  if command -v brew >/dev/null 2>&1; then
-    printf 'Installing via Homebrew…\n'
+  printf '\naz CLI not found — installing…\n'
+  if command -v pip3 >/dev/null 2>&1; then
+    printf 'Trying pip3 install azure-cli (fastest)…\n'
+    pip3 install --quiet azure-cli && export PATH="$HOME/.local/bin:$PATH"
+  fi
+  if ! command -v az >/dev/null 2>&1 && command -v brew >/dev/null 2>&1; then
+    printf 'pip3 path failed — falling back to Homebrew (slow, compiles from source)…\n'
     brew install azure-cli
-  else
-    printf 'Install: https://docs.microsoft.com/cli/azure/install-azure-cli\n'
+  fi
+  if ! command -v az >/dev/null 2>&1; then
+    printf 'Could not install az CLI. Run manually:\n  pip3 install azure-cli\nor: https://docs.microsoft.com/cli/azure/install-azure-cli\n' >&2
     exit 1
   fi
 fi
