@@ -8,20 +8,34 @@ import { CommonModule } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <nav aria-label="Table pagination" *ngIf="totalPages > 1">
-      <ul class="pagination pagination-sm mb-0 flex-wrap">
-        <li class="page-item" [class.disabled]="page <= 1">
-          <button class="page-link" (click)="go(page - 1)" [attr.aria-disabled]="page <= 1" aria-label="Previous page">
-            &laquo;
+      <ul class="flex items-center gap-1">
+        <li>
+          <button type="button"
+                  class="flex h-9 items-center rounded-md border border-gray-300 px-3 text-sm hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-700 dark:hover:bg-gray-800"
+                  [disabled]="page <= 1"
+                  (click)="go(page - 1)"
+                  aria-label="Previous page">
+            Prev
           </button>
         </li>
-
-        <li *ngFor="let p of pages" class="page-item" [class.active]="p === page" [attr.aria-current]="p === page ? 'page' : null">
-          <button class="page-link" (click)="go(p)" [attr.aria-label]="'Page ' + p">{{ p }}</button>
+        <li *ngFor="let p of pages"
+            [attr.aria-current]="p === page ? 'page' : null">
+          <button type="button"
+                  [class]="p === page
+                    ? 'flex h-9 min-w-9 items-center justify-center rounded-md px-3 text-sm bg-indigo-600 text-white'
+                    : 'flex h-9 min-w-9 items-center justify-center rounded-md px-3 text-sm border border-gray-300 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800'"
+                  (click)="go(p)"
+                  [attr.aria-label]="'Page ' + p">
+            {{ p }}
+          </button>
         </li>
-
-        <li class="page-item" [class.disabled]="page >= totalPages">
-          <button class="page-link" (click)="go(page + 1)" [attr.aria-disabled]="page >= totalPages" aria-label="Next page">
-            &raquo;
+        <li>
+          <button type="button"
+                  class="flex h-9 items-center rounded-md border border-gray-300 px-3 text-sm hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-700 dark:hover:bg-gray-800"
+                  [disabled]="page >= totalPages"
+                  (click)="go(page + 1)"
+                  aria-label="Next page">
+            Next
           </button>
         </li>
       </ul>

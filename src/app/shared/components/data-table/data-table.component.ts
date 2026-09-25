@@ -1,6 +1,6 @@
 import {
   Component, Input, Output, EventEmitter,
-  ChangeDetectionStrategy, ContentChildren, QueryList, AfterContentInit,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -11,39 +11,47 @@ export interface TableColumn<T> {
   class?: string;
 }
 
+function cn(...classes: (string | false | undefined | null)[]): string {
+  return classes.filter(Boolean).join(' ');
+}
+
 @Component({
   selector: 'app-data-table',
   standalone: true,
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="table-responsive">
-      <table class="table table-hover table-sm align-middle mb-0" role="grid" [attr.aria-rowcount]="rows.length">
-        <caption *ngIf="caption" class="visually-hidden">{{ caption }}</caption>
-        <thead class="table-light">
-          <tr>
+    <div class="overflow-x-auto">
+      <table class="w-full border-collapse text-sm" role="grid" [attr.aria-rowcount]="rows.length">
+        <caption *ngIf="caption" class="sr-only">{{ caption }}</caption>
+        <thead>
+          <tr class="border-b border-gray-200 text-left dark:border-gray-800">
             <th *ngFor="let col of columns" scope="col"
-                [class]="col.class ?? ''"
-                [class.sortable-col]="col.sortable"
+                [class]="thClass(col)"
                 [attr.aria-sort]="col.sortable ? ariaSortFor(col) : null"
                 (click)="col.sortable && onSort(col)">
-              {{ col.label }}
-              <span *ngIf="col.sortable" class="sort-icon ms-1" aria-hidden="true">
-                {{ sortKey === col.key ? (sortDir === 'asc' ? '↑' : '↓') : '⇅' }}
+              <span class="inline-flex items-center gap-1">
+                {{ col.label }}
+                <span *ngIf="col.sortable" aria-hidden="true"
+                      [class]="sortKey === col.key ? 'text-xs text-indigo-500' : 'text-xs text-transparent'">
+                  {{ sortKey === col.key ? (sortDir === 'asc' ? '▲' : '▼') : '▲' }}
+                </span>
               </span>
             </th>
           </tr>
         </thead>
         <tbody>
           <tr *ngIf="loading">
-            <td [attr.colspan]="columns.length" class="text-center py-4">
-              <div class="spinner-border spinner-border-sm text-primary" role="status">
-                <span class="visually-hidden">Loading…</span>
-              </div>
+            <td [attr.colspan]="columns.length" class="py-10 text-center">
+              <span class="inline-block h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-indigo-500 dark:border-gray-700 dark:border-t-indigo-400"
+                    role="status" aria-label="Loading"></span>
             </td>
           </tr>
           <tr *ngIf="!loading && rows.length === 0">
-            <td [attr.colspan]="columns.length" class="text-center text-muted py-4">No results found.</td>
+            <td [attr.colspan]="columns.length"
+                class="py-12 text-center text-sm text-gray-400 dark:text-gray-500">
+              No results found.
+            </td>
           </tr>
           <ng-container *ngIf="!loading">
             <ng-content></ng-content>
@@ -52,10 +60,6 @@ export interface TableColumn<T> {
       </table>
     </div>
   `,
-  styles: [`
-    .sortable-col { cursor: pointer; user-select: none; }
-    .sortable-col:hover { background: var(--bs-table-hover-bg); }
-  `],
 })
 export class DataTableComponent {
   @Input({ required: true }) columns!: TableColumn<any>[];
@@ -65,6 +69,14 @@ export class DataTableComponent {
   @Input() sortKey?: string;
   @Input() sortDir?: 'asc' | 'desc';
   @Output() sortChange = new EventEmitter<{ key: string; dir: 'asc' | 'desc' }>();
+
+  thClass(col: TableColumn<any>): string {
+    return cn(
+      'px-3 py-2 font-medium text-gray-500 dark:text-gray-400',
+      col.sortable && 'cursor-pointer select-none hover:text-gray-700 dark:hover:text-gray-200',
+      col.class,
+    );
+  }
 
   onSort(col: TableColumn<any>): void {
     const newDir: 'asc' | 'desc' =

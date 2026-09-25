@@ -1,12 +1,13 @@
 import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { OrdersService, RegionsService, OrderDTO, RegionSummary, OrderStatus } from '@angular-dashboard/data-access';
 import { DataTableComponent, TableColumn, PaginationComponent, StatusBadgeComponent } from '@angular-dashboard/ui';
 
 const ORDER_STATUSES: OrderStatus[] = ['PENDING','CONFIRMED','PROCESSING','SHIPPED','DELIVERED','CANCELLED','REFUNDED'];
+
+const SELECT_CLS = 'rounded-md border border-gray-300 bg-white px-2 py-1.5 text-sm text-gray-900 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100';
 
 @Component({
   selector: 'app-orders',
@@ -14,85 +15,100 @@ const ORDER_STATUSES: OrderStatus[] = ['PENDING','CONFIRMED','PROCESSING','SHIPP
   imports: [CommonModule, ReactiveFormsModule, DataTableComponent, PaginationComponent, StatusBadgeComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <main id="main-content" class="container-fluid py-4" aria-label="Orders list">
-      <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
-        <h1 class="h4 mb-0 fw-semibold">Orders</h1>
-        <span class="text-muted small" aria-live="polite">
-          {{ total() | number }} {{ approximate() ? '(approx.)' : '' }} results
-        </span>
-      </div>
+    <main id="main-content" class="w-full px-5 py-8" aria-label="Orders list">
+      <header class="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 class="text-2xl font-semibold tracking-tight text-gray-900 dark:text-gray-50">Orders</h1>
+          <p class="text-sm text-gray-500 dark:text-gray-400" aria-live="polite">
+            {{ total() | number }}{{ approximate() ? ' (approx.)' : '' }} results
+          </p>
+        </div>
+      </header>
 
-      <form [formGroup]="filterForm" class="row g-2 mb-3" aria-label="Filter orders" role="search">
-        <div class="col-12 col-md-4">
-          <label for="ordersSearch" class="visually-hidden">Search orders</label>
-          <input id="ordersSearch" type="search" class="form-control form-control-sm"
-                 placeholder="Search name, email, notes…" formControlName="q"
+      <form [formGroup]="filterForm" aria-label="Filter orders" role="search">
+        <div class="relative mb-3">
+          <svg aria-hidden="true" viewBox="0 0 20 20" fill="none"
+               class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400">
+            <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M14 14L18 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <label for="ordersSearch" class="sr-only">Search orders</label>
+          <input id="ordersSearch" type="search" formControlName="q"
+                 placeholder="Search name, email, notes…"
+                 class="w-full rounded-full border border-gray-300 bg-white py-3 pl-11 pr-4 text-base text-gray-900 shadow-sm outline-none placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100"
                  aria-label="Search orders" />
         </div>
-        <div class="col-6 col-md-2">
-          <label for="statusFilter" class="visually-hidden">Filter by status</label>
-          <select id="statusFilter" class="form-select form-select-sm" formControlName="status" aria-label="Filter by status">
+
+        <div class="flex flex-wrap gap-2 mb-4">
+          <label class="sr-only" for="statusFilter">Filter by status</label>
+          <select id="statusFilter" [class]="selectCls" formControlName="status" aria-label="Filter by status">
             <option value="">All statuses</option>
             <option *ngFor="let s of statuses" [value]="s">{{ s }}</option>
           </select>
-        </div>
-        <div class="col-6 col-md-2">
-          <label for="regionFilter" class="visually-hidden">Filter by region</label>
-          <select id="regionFilter" class="form-select form-select-sm" formControlName="regionCode" aria-label="Filter by region">
+
+          <label class="sr-only" for="regionFilter">Filter by region</label>
+          <select id="regionFilter" [class]="selectCls" formControlName="regionCode" aria-label="Filter by region">
             <option value="">All regions</option>
             <option *ngFor="let r of regions()" [value]="r.code">{{ r.name }}</option>
           </select>
-        </div>
-        <div class="col-6 col-md-2">
-          <label for="dateFrom" class="visually-hidden">From date</label>
-          <input id="dateFrom" type="date" class="form-control form-control-sm" formControlName="from" aria-label="From date" />
-        </div>
-        <div class="col-6 col-md-2">
-          <label for="dateTo" class="visually-hidden">To date</label>
-          <input id="dateTo" type="date" class="form-control form-control-sm" formControlName="to" aria-label="To date" />
+
+          <label class="sr-only" for="dateFrom">From date</label>
+          <input id="dateFrom" type="date" [class]="selectCls" formControlName="from" aria-label="From date" />
+
+          <label class="sr-only" for="dateTo">To date</label>
+          <input id="dateTo" type="date" [class]="selectCls" formControlName="to" aria-label="To date" />
         </div>
       </form>
 
-      <app-data-table
-        [columns]="columns"
-        [rows]="orders()"
-        [loading]="loading()"
-        [sortKey]="sortKey()"
-        [sortDir]="sortDir()"
-        caption="Orders table"
-        (sortChange)="onSort($event)">
-        <tr *ngFor="let order of orders()" tabindex="0">
-          <td>{{ order.id }}</td>
-          <td>{{ order.customer.firstName }} {{ order.customer.lastName }}</td>
-          <td><app-status-badge [status]="order.status" /></td>
-          <td class="text-end">{{ order.total | currency }}</td>
-          <td>{{ order.region.name }}</td>
-          <td>{{ order.placedAt | date:'mediumDate' }}</td>
-        </tr>
-      </app-data-table>
+      <section class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 mb-4"
+               aria-label="Orders table">
+        <app-data-table
+          [columns]="columns"
+          [rows]="orders()"
+          [loading]="loading()"
+          [sortKey]="sortKey()"
+          [sortDir]="sortDir()"
+          caption="Orders table"
+          (sortChange)="onSort($event)">
+          <tr *ngFor="let order of orders()"
+              class="border-b border-gray-100 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800/50 transition-colors"
+              tabindex="0">
+            <td class="px-3 py-2 align-top text-gray-900 dark:text-gray-100">{{ order.id }}</td>
+            <td class="px-3 py-2 align-top text-gray-900 dark:text-gray-100">{{ order.customer.firstName }} {{ order.customer.lastName }}</td>
+            <td class="px-3 py-2 align-top"><app-status-badge [status]="order.status" /></td>
+            <td class="px-3 py-2 align-top text-right tabular-nums text-gray-900 dark:text-gray-100">{{ order.total | currency }}</td>
+            <td class="px-3 py-2 align-top text-gray-700 dark:text-gray-300">{{ order.region.name }}</td>
+            <td class="px-3 py-2 align-top text-gray-700 dark:text-gray-300">{{ order.placedAt | date:'mediumDate' }}</td>
+          </tr>
+        </app-data-table>
+      </section>
 
-      <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
-        <div>
-          <label for="pageSize" class="visually-hidden">Rows per page</label>
-          <select id="pageSize" class="form-select form-select-sm w-auto"
+      <footer class="flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <label for="pageSize" class="text-sm text-gray-500 dark:text-gray-400">Rows per page</label>
+          <select id="pageSize" [class]="selectCls"
                   [value]="pageSize()" (change)="onPageSize($event)" aria-label="Rows per page">
-            <option value="10">10 / page</option>
-            <option value="20">20 / page</option>
-            <option value="50">50 / page</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
           </select>
         </div>
-        <app-pagination [page]="page()" [totalPages]="totalPages()" (pageChange)="onPage($event)" />
-      </div>
+        <div class="flex items-center gap-3">
+          <span class="text-sm text-gray-500 dark:text-gray-400">
+            Page {{ page() }} of {{ totalPages() }}
+          </span>
+          <app-pagination [page]="page()" [totalPages]="totalPages()" (pageChange)="onPage($event)" />
+        </div>
+      </footer>
     </main>
   `,
 })
 export class OrdersComponent implements OnInit {
   private readonly ordersSvc = inject(OrdersService);
   private readonly regionsSvc = inject(RegionsService);
-  private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
 
+  readonly selectCls = SELECT_CLS;
   readonly statuses = ORDER_STATUSES;
   readonly orders = signal<OrderDTO[]>([]);
   readonly regions = signal<RegionSummary[]>([]);
@@ -117,19 +133,17 @@ export class OrdersComponent implements OnInit {
     { key: 'id',        label: 'ID',       sortable: false },
     { key: 'customer',  label: 'Customer',  sortable: true },
     { key: 'status',    label: 'Status',    sortable: true },
-    { key: 'total',     label: 'Total',     sortable: true, class: 'text-end' },
+    { key: 'total',     label: 'Total',     sortable: true, class: 'text-right' },
     { key: 'region',    label: 'Region',    sortable: false },
     { key: 'placedAt',  label: 'Date',      sortable: true },
   ];
 
   ngOnInit(): void {
     this.regionsSvc.list().subscribe((r) => this.regions.set(r));
-
     this.filterForm.valueChanges.pipe(debounceTime(300), distinctUntilChanged()).subscribe(() => {
       this.page.set(1);
       this.fetch();
     });
-
     this.fetch();
   }
 

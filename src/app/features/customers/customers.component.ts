@@ -5,54 +5,78 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { CustomersService, RegionsService, CustomerDTO, RegionSummary } from '@angular-dashboard/data-access';
 import { DataTableComponent, TableColumn } from '@angular-dashboard/ui';
 
+const SELECT_CLS = 'rounded-md border border-gray-300 bg-white px-2 py-1.5 text-sm text-gray-900 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100';
+
 @Component({
   selector: 'app-customers',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, DataTableComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <main id="main-content" class="container-fluid py-4" aria-label="Customers list">
-      <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
-        <h1 class="h4 mb-0 fw-semibold">Customers</h1>
-      </div>
+    <main id="main-content" class="w-full px-5 py-8" aria-label="Customers list">
+      <header class="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 class="text-2xl font-semibold tracking-tight text-gray-900 dark:text-gray-50">Customers</h1>
+        </div>
+      </header>
 
-      <form [formGroup]="filterForm" class="row g-2 mb-3" aria-label="Filter customers" role="search">
-        <div class="col-12 col-md-5">
-          <label for="customerSearch" class="visually-hidden">Search customers</label>
-          <input id="customerSearch" type="search" class="form-control form-control-sm"
-                 placeholder="Search name or email…" formControlName="q"
+      <form [formGroup]="filterForm" aria-label="Filter customers" role="search">
+        <div class="relative mb-3">
+          <svg aria-hidden="true" viewBox="0 0 20 20" fill="none"
+               class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400">
+            <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M14 14L18 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <label for="customerSearch" class="sr-only">Search customers</label>
+          <input id="customerSearch" type="search" formControlName="q"
+                 placeholder="Search name or email…"
+                 class="w-full rounded-full border border-gray-300 bg-white py-3 pl-11 pr-4 text-base text-gray-900 shadow-sm outline-none placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100"
                  aria-label="Search customers" />
         </div>
-        <div class="col-12 col-md-3">
-          <label for="regionFilter" class="visually-hidden">Filter by region</label>
-          <select id="regionFilter" class="form-select form-select-sm" formControlName="regionId" aria-label="Filter by region">
+
+        <div class="flex flex-wrap gap-2 mb-4">
+          <label class="sr-only" for="regionFilter">Filter by region</label>
+          <select id="regionFilter" [class]="selectCls" formControlName="regionId" aria-label="Filter by region">
             <option value="">All regions</option>
             <option *ngFor="let r of regions()" [value]="r.id">{{ r.name }}</option>
           </select>
         </div>
       </form>
 
-      <app-data-table [columns]="columns" [rows]="customers()" [loading]="loading()" caption="Customers table">
-        <tr *ngFor="let c of customers()" tabindex="0">
-          <td>{{ c.id }}</td>
-          <td>{{ c.firstName }} {{ c.lastName }}</td>
-          <td><a [href]="'mailto:' + c.email" [attr.aria-label]="'Email ' + c.firstName">{{ c.email }}</a></td>
-          <td>{{ c.phone ?? '—' }}</td>
-          <td>{{ c.region.name }}</td>
-          <td>{{ c.createdAt | date:'mediumDate' }}</td>
-        </tr>
-      </app-data-table>
+      <section class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 mb-4"
+               aria-label="Customers table">
+        <app-data-table [columns]="columns" [rows]="customers()" [loading]="loading()" caption="Customers table">
+          <tr *ngFor="let c of customers()"
+              class="border-b border-gray-100 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800/50 transition-colors"
+              tabindex="0">
+            <td class="px-3 py-2 align-top text-gray-900 dark:text-gray-100">{{ c.id }}</td>
+            <td class="px-3 py-2 align-top text-gray-900 dark:text-gray-100">{{ c.firstName }} {{ c.lastName }}</td>
+            <td class="px-3 py-2 align-top">
+              <a [href]="'mailto:' + c.email"
+                 [attr.aria-label]="'Email ' + c.firstName"
+                 class="text-indigo-600 hover:underline dark:text-indigo-400">
+                {{ c.email }}
+              </a>
+            </td>
+            <td class="px-3 py-2 align-top text-gray-700 dark:text-gray-300">{{ c.phone ?? '—' }}</td>
+            <td class="px-3 py-2 align-top text-gray-700 dark:text-gray-300">{{ c.region.name }}</td>
+            <td class="px-3 py-2 align-top text-gray-700 dark:text-gray-300">{{ c.createdAt | date:'mediumDate' }}</td>
+          </tr>
+        </app-data-table>
+      </section>
 
-      <div class="d-flex justify-content-end mt-3 gap-2" aria-label="Load more controls">
-        <button *ngIf="cursorStack().length > 1" class="btn btn-outline-secondary btn-sm"
+      <footer class="flex justify-end gap-2">
+        <button *ngIf="cursorStack().length > 1"
+                class="flex h-9 items-center rounded-md border border-gray-300 px-3 text-sm hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-700 dark:hover:bg-gray-800"
                 (click)="prevPage()" aria-label="Previous page">
           ← Prev
         </button>
-        <button *ngIf="hasMore()" class="btn btn-outline-primary btn-sm"
+        <button *ngIf="hasMore()"
+                class="flex h-9 items-center rounded-md border border-gray-300 px-3 text-sm hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800"
                 (click)="nextPage()" aria-label="Next page">
           Next →
         </button>
-      </div>
+      </footer>
     </main>
   `,
 })
@@ -61,6 +85,7 @@ export class CustomersComponent implements OnInit {
   private readonly regionsSvc = inject(RegionsService);
   private readonly fb = inject(FormBuilder);
 
+  readonly selectCls = SELECT_CLS;
   readonly customers = signal<CustomerDTO[]>([]);
   readonly regions = signal<RegionSummary[]>([]);
   readonly loading = signal(false);

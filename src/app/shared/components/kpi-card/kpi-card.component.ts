@@ -7,12 +7,11 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <article class="card h-100 border-0 shadow-sm" [attr.aria-label]="label">
-      <div class="card-body">
-        <p class="card-text text-muted small mb-1">{{ label }}</p>
-        <p class="card-title h4 mb-0 fw-semibold">{{ value }}</p>
-        <p *ngIf="sub" class="small text-muted mt-1 mb-0">{{ sub }}</p>
-      </div>
+    <article class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900"
+             [attr.aria-label]="label">
+      <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">{{ label }}</p>
+      <p class="text-2xl font-semibold text-gray-900 dark:text-gray-50">{{ value }}</p>
+      <p *ngIf="sub" class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ sub }}</p>
     </article>
   `,
 })
