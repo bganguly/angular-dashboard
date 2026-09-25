@@ -75,11 +75,17 @@ printf '  Subscription : %s\n' "$AZ_SUBSCRIPTION"
 printf '  Location     : %s\n' "$AZ_LOCATION"
 printf '  Name prefix  : %s\n' "$NAME_PREFIX"
 
-BACKEND_URL="${BACKEND_URL:-}"
-if [[ -z "$BACKEND_URL" ]]; then
-  printf '\nEnter Spring Boot backend URL (e.g. https://xxx.azurecontainerapps.io): '
-  read -r BACKEND_URL
-  [[ -n "$BACKEND_URL" ]] || { printf 'Backend URL required.\n' >&2; exit 1; }
+BACKEND_ENV="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../java-implementations/springboot-dashboard-backend" 2>/dev/null && pwd)/.env.gcp.full"
+
+if [[ -z "${BACKEND_URL:-}" && -f "$BACKEND_ENV" ]]; then
+  BACKEND_URL=$(grep -i 'CLOUD_RUN_URL=' "$BACKEND_ENV" | head -1 | cut -d= -f2-)
+  printf '  Backend URL  : %s (from springboot-dashboard-backend/.env.gcp.full)\n' "$BACKEND_URL"
+fi
+
+if [[ -z "${BACKEND_URL:-}" ]]; then
+  printf '\nCould not auto-detect backend URL.\nRun the springboot-dashboard-backend deploy first, or set BACKEND_URL manually:\n'
+  printf '  BACKEND_URL=https://your-backend ./scripts/deploy.sh\n' >&2
+  exit 1
 fi
 
 cd "$INFRA_DIR"
