@@ -122,6 +122,7 @@ cd "$INFRA_DIR"
 terraform init -input=false
 
 ACR_NAME=$(terraform output -raw acr_login_server 2>/dev/null || true)
+[[ "$ACR_NAME" != *".azurecr.io" ]] && ACR_NAME=""
 
 if [[ -z "$ACR_NAME" ]]; then
   printf '\n=== provisioning ACR (first deploy only) ===\n'
