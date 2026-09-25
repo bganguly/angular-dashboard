@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { distinctUntilChanged } from 'rxjs/operators';
 import { OrdersService, RegionsService, OrderDTO, RegionSummary, OrderStatus } from '@angular-dashboard/data-access';
 import { DataTableComponent, TableColumn, PaginationComponent, StatusBadgeComponent } from '@angular-dashboard/ui';
 
@@ -34,9 +34,11 @@ const SELECT_CLS = 'rounded-md border border-gray-300 bg-white px-2 py-1.5 text-
           </svg>
           <label for="ordersSearch" class="sr-only">Search orders</label>
           <input id="ordersSearch" type="search" formControlName="q"
-                 placeholder="Search name, email, notes…"
+                 placeholder="Search name, email, notes… (press Enter)"
                  class="w-full rounded-full border border-gray-300 bg-white py-3 pl-11 pr-4 text-base text-gray-900 shadow-sm outline-none placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100"
-                 aria-label="Search orders" />
+                 aria-label="Search orders"
+                 (keydown.enter)="commitSearch()"
+                 (input)="onSearchInput($event)" />
         </div>
 
         <div class="flex flex-wrap gap-2 mb-4">
@@ -140,11 +142,28 @@ export class OrdersComponent implements OnInit {
 
   ngOnInit(): void {
     this.regionsSvc.list().subscribe((r) => this.regions.set(r));
-    this.filterForm.valueChanges.pipe(debounceTime(300), distinctUntilChanged()).subscribe(() => {
+
+    const controls = this.filterForm.controls;
+    for (const ctrl of [controls.status, controls.regionCode, controls.from, controls.to]) {
+      ctrl.valueChanges.pipe(distinctUntilChanged()).subscribe(() => {
+        this.page.set(1);
+        this.fetch();
+      });
+    }
+
+    this.fetch();
+  }
+
+  commitSearch(): void {
+    this.page.set(1);
+    this.fetch();
+  }
+
+  onSearchInput(e: Event): void {
+    if ((e.target as HTMLInputElement).value === '') {
       this.page.set(1);
       this.fetch();
-    });
-    this.fetch();
+    }
   }
 
   fetch(): void {

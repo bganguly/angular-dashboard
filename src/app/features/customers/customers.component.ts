@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { distinctUntilChanged } from 'rxjs/operators';
 import { CustomersService, RegionsService, CustomerDTO, RegionSummary } from '@angular-dashboard/data-access';
 import { DataTableComponent, TableColumn } from '@angular-dashboard/ui';
 
@@ -29,9 +29,11 @@ const SELECT_CLS = 'rounded-md border border-gray-300 bg-white px-2 py-1.5 text-
           </svg>
           <label for="customerSearch" class="sr-only">Search customers</label>
           <input id="customerSearch" type="search" formControlName="q"
-                 placeholder="Search name or email…"
+                 placeholder="Search name or email… (press Enter)"
                  class="w-full rounded-full border border-gray-300 bg-white py-3 pl-11 pr-4 text-base text-gray-900 shadow-sm outline-none placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100"
-                 aria-label="Search customers" />
+                 aria-label="Search customers"
+                 (keydown.enter)="commitSearch()"
+                 (input)="onSearchInput($event)" />
         </div>
 
         <div class="flex flex-wrap gap-2 mb-4">
@@ -105,11 +107,25 @@ export class CustomersComponent implements OnInit {
 
   ngOnInit(): void {
     this.regionsSvc.list().subscribe((r) => this.regions.set(r));
-    this.filterForm.valueChanges.pipe(debounceTime(300), distinctUntilChanged()).subscribe(() => {
+
+    this.filterForm.controls.regionId.valueChanges.pipe(distinctUntilChanged()).subscribe(() => {
       this.cursorStack.set([null]);
       this.fetch();
     });
+
     this.fetch();
+  }
+
+  commitSearch(): void {
+    this.cursorStack.set([null]);
+    this.fetch();
+  }
+
+  onSearchInput(e: Event): void {
+    if ((e.target as HTMLInputElement).value === '') {
+      this.cursorStack.set([null]);
+      this.fetch();
+    }
   }
 
   fetch(): void {
