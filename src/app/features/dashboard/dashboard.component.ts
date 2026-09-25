@@ -21,6 +21,7 @@ const OTHER_KEY = 'Others';
 const PALETTE = ['#6366f1', '#22c55e', '#f59e0b', '#ef4444', '#06b6d4', '#a855f7', '#ec4899'];
 const OTHER_COLOR = '#94a3b8';
 const DRAG_DEBOUNCE_MS = 250;
+const ALL_DATES_FROM = '2019-01-01';
 const ORDER_STATUSES: OrderStatus[] = [
   'PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'REFUNDED',
 ];
@@ -155,7 +156,14 @@ const FIELD_CLS = 'w-full rounded-md border border-gray-300 bg-white px-2 py-1.5
                         [attr.aria-label]="'Remove region ' + code"
                         class="text-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-200">×</button>
               </span>
-              <span *ngIf="filters().from || filters().to"
+              <span *ngIf="allDates()"
+                    class="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-0.5 text-xs text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
+                All dates
+                <button type="button" (click)="toggleAllDates()"
+                        aria-label="Remove all dates filter"
+                        class="text-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-200">×</button>
+              </span>
+              <span *ngIf="!allDates() && (filters().from || filters().to)"
                     class="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-0.5 text-xs text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
                 {{ filters().from || '…' }} → {{ filters().to || '…' }}
                 <button type="button" (click)="patchFilters({ from: '', to: '' })"
@@ -232,14 +240,21 @@ const FIELD_CLS = 'w-full rounded-md border border-gray-300 bg-white px-2 py-1.5
           <!-- Date range -->
           <fieldset class="mb-5 space-y-1.5">
             <legend class="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">Placed date</legend>
-            <label class="block text-xs text-gray-500 dark:text-gray-400">
-              From
-              <input type="date" [value]="filters().from" (change)="onDateFrom($event)" [class]="fieldCls" />
+            <label class="flex cursor-pointer items-center gap-2 rounded-md px-1 py-0.5 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800">
+              <input type="checkbox" [checked]="allDates()" (change)="toggleAllDates()"
+                     class="h-3.5 w-3.5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+              All dates
             </label>
-            <label class="block text-xs text-gray-500 dark:text-gray-400">
-              To
-              <input type="date" [value]="filters().to" (change)="onDateTo($event)" [class]="fieldCls" />
-            </label>
+            <ng-container *ngIf="!allDates()">
+              <label class="block text-xs text-gray-500 dark:text-gray-400">
+                From
+                <input type="date" [value]="filters().from" (change)="onDateFrom($event)" [class]="fieldCls" />
+              </label>
+              <label class="block text-xs text-gray-500 dark:text-gray-400">
+                To
+                <input type="date" [value]="filters().to" (change)="onDateTo($event)" [class]="fieldCls" />
+              </label>
+            </ng-container>
           </fieldset>
 
           <!-- Order total range -->
@@ -272,6 +287,9 @@ const FIELD_CLS = 'w-full rounded-md border border-gray-300 bg-white px-2 py-1.5
             <h2 class="text-base font-semibold text-gray-900 dark:text-gray-50">Aggregates</h2>
             <p class="text-xs text-gray-500 dark:text-gray-400">
               {{ brushStartDate() }} → {{ brushEndDate() }}<span class="ml-2 text-gray-400">drag slider to narrow</span>
+            </p>
+            <p *ngIf="searchQuery()" class="mt-0.5 text-xs text-amber-500 dark:text-amber-400">
+              Chart reflects full date range · not filtered by search
             </p>
           </div>
           <span *ngIf="chartLoading()" class="text-xs text-indigo-500" aria-live="polite">updating…</span>
@@ -472,6 +490,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   readonly sidebarOpen = signal(false);
   readonly sidebarCollapsed = signal(false);
   readonly regionSearch = signal('');
+  readonly allDates = signal(false);
 
   // Filters
   readonly filters = signal<DashFilters>({
@@ -570,7 +589,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const f = this.filters();
     return (
       f.status.length + f.regionCodes.length +
-      (f.from || f.to ? 1 : 0) +
+      (this.allDates() || f.from || f.to ? 1 : 0) +
       (f.totalMin || f.totalMax ? 1 : 0)
     );
   });
@@ -622,9 +641,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
   clearFilters(): void {
     this.localMin = '';
     this.localMax = '';
+    this.allDates.set(false);
     this.filters.set({
       status: [], regionCodes: [], from: '', to: '', totalMin: '', totalMax: '',
     });
+    this.page.set(1);
+    this.loadChart();
+    this.loadOrders();
+  }
+
+  toggleAllDates(): void {
+    const next = !this.allDates();
+    this.allDates.set(next);
+    if (next) {
+      this.filters.update(f => ({ ...f, from: '', to: '' }));
+    } else {
+      this.filters.update(f => ({ ...f, from: this.defaultFrom(), to: this.defaultTo() }));
+    }
     this.page.set(1);
     this.loadChart();
     this.loadOrders();
@@ -662,8 +695,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   loadChart(): void {
     const f = this.filters();
-    const from = f.from || this.defaultFrom();
-    const to = f.to || this.defaultTo();
+    const from = this.allDates() ? ALL_DATES_FROM : (f.from || this.defaultFrom());
+    const to = this.allDates() ? this.defaultTo() : (f.to || this.defaultTo());
     this.chartLoading.set(true);
     this.aggSvc.get(from, to, TOP_N + 1, {
       status: f.status.length ? f.status.join(',') : null,
@@ -680,6 +713,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private buildChart(data: DailyAggregate[]): void {
+    this.showOthers.set(false);
     const totals = new Map<string, number>();
     for (const day of data) {
       for (const [cat, c] of Object.entries(day.categories ?? {})) {
