@@ -288,9 +288,6 @@ const FIELD_CLS = 'w-full rounded-md border border-gray-300 bg-white px-2 py-1.5
             <p class="text-xs text-gray-500 dark:text-gray-400">
               {{ brushStartDate() }} → {{ brushEndDate() }}<span class="ml-2 text-gray-400">drag slider to narrow</span>
             </p>
-            <p *ngIf="searchQuery()" class="mt-0.5 text-xs text-amber-500 dark:text-amber-400">
-              Chart reflects full date range · not filtered by search
-            </p>
           </div>
           <span *ngIf="chartLoading()" class="text-xs text-indigo-500" aria-live="polite">updating…</span>
         </header>
@@ -699,6 +696,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const to = this.allDates() ? this.defaultTo() : (f.to || this.defaultTo());
     this.chartLoading.set(true);
     this.aggSvc.get(from, to, TOP_N + 1, {
+      q: this.searchQuery() || null,
       status: f.status.length ? f.status.join(',') : null,
       regionCode: f.regionCodes.length ? f.regionCodes.join(',') : null,
       minTotal: f.totalMin || null,
@@ -852,13 +850,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   commitSearch(): void {
     this.page.set(1);
+    this.loadChart();
     this.loadOrders();
   }
 
   onSearchInput(e: Event): void {
     const val = (e.target as HTMLInputElement).value;
     this.searchQuery.set(val);
-    if (!val) { this.page.set(1); this.loadOrders(); }
+    if (!val) { this.page.set(1); this.loadChart(); this.loadOrders(); }
   }
 
   onSort(key: string): void {

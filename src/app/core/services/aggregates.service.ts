@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { AggregateResult } from '../models';
 
 export interface AggregateFilters {
+  q?: string | null;
   status?: string | null;
   regionCode?: string | null;
   minTotal?: string | null;
@@ -24,6 +25,7 @@ export class AggregatesService {
       .set('from', from)
       .set('to', to)
       .set('topCategories', String(topCategories));
+    if (extra?.q) params = params.set('q', extra.q);
     if (extra?.status) params = params.set('status', extra.status);
     if (extra?.regionCode) params = params.set('regionCode', extra.regionCode);
     if (extra?.minTotal) params = params.set('minTotal', extra.minTotal);
