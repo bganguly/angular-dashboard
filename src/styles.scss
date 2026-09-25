@@ -1,0 +1,30 @@
+@import 'bootstrap/scss/bootstrap';
+
+:root {
+  --bs-body-bg: #f8f9fa;
+}
+
+body {
+  min-height: 100vh;
+}
+
+.visually-hidden-focusable:focus {
+  position: fixed;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 9999;
+  padding: 0.5rem 1rem;
+  background: var(--bs-primary);
+  color: #fff;
+  border-radius: 0.25rem;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.card {
+  border-radius: 0.75rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}

@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.angular/
+coverage/
+*.env.azure
+.env.azure
+*.tfstate
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+proxy.conf.json
+*.log
