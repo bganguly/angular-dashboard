@@ -1,6 +1,6 @@
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { OrderStatus } from '../../../core/models';
+import { OrderStatus } from '@angular-dashboard/data-access';
 
 const STATUS_CLASS: Record<OrderStatus, string> = {
   PENDING:    'bg-warning text-dark',

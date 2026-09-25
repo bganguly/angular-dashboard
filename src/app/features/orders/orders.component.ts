@@ -3,12 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { OrdersService } from '../../core/services/orders.service';
-import { RegionsService } from '../../core/services/regions.service';
-import { DataTableComponent, TableColumn } from '../../shared/components/data-table/data-table.component';
-import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
-import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge.component';
-import { OrderDTO, RegionSummary, OrderStatus } from '../../core/models';
+import { OrdersService, RegionsService, OrderDTO, RegionSummary, OrderStatus } from '@angular-dashboard/data-access';
+import { DataTableComponent, TableColumn, PaginationComponent, StatusBadgeComponent } from '@angular-dashboard/ui';
 
 const ORDER_STATUSES: OrderStatus[] = ['PENDING','CONFIRMED','PROCESSING','SHIPPED','DELIVERED','CANCELLED','REFUNDED'];
 

@@ -3,9 +3,8 @@ import { CommonModule, CurrencyPipe } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
 import { Chart, ChartConfiguration, registerables } from 'chart.js';
-import { AggregatesService } from '../../core/services/aggregates.service';
-import { KpiCardComponent } from '../../shared/components/kpi-card/kpi-card.component';
-import { DailyAggregate } from '../../core/models';
+import { AggregatesService, DailyAggregate } from '@angular-dashboard/data-access';
+import { KpiCardComponent } from '@angular-dashboard/ui';
 
 Chart.register(...registerables);
 

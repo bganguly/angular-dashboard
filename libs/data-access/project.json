@@ -1,0 +1,8 @@
+{
+  "name": "@angular-dashboard/data-access",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/data-access/src",
+  "prefix": "data-access",
+  "tags": ["type:data-access", "scope:shared"]
+}

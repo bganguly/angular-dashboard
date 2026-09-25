@@ -1,0 +1,88 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pr:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  NODE_VERSION: '20'
+  REPO_NAME: 'angular-dashboard-frontend'
+
+stages:
+  - stage: CI
+    displayName: 'Build & Test'
+    jobs:
+      - job: build_and_test
+        displayName: 'npm ci → jest → ng build'
+        steps:
+          - task: NodeTool@0
+            displayName: 'Use Node $(NODE_VERSION)'
+            inputs:
+              versionSpec: '$(NODE_VERSION).x'
+
+          - script: npm ci
+            displayName: 'Install dependencies'
+
+          - script: npm test -- --ci --runInBand
+            displayName: 'Run Jest tests'
+
+          - task: PublishTestResults@2
+            displayName: 'Publish test results'
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: 'coverage/junit.xml'
+              failTaskOnFailedTests: true
+
+          - script: npm run build:prod
+            displayName: 'Production build'
+
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish dist artifact'
+            inputs:
+              pathToPublish: 'dist/angular-dashboard/browser'
+              artifactName: 'angular-dashboard-dist'
+
+  - stage: Deploy
+    displayName: 'Deploy to Azure Container Apps'
+    dependsOn: CI
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - deployment: push_image
+        displayName: 'Build image via ACR Tasks'
+        environment: 'production'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+
+                - task: AzureCLI@2
+                  displayName: 'az acr build → Container App update'
+                  inputs:
+                    azureSubscription: '$(AZ_SERVICE_CONNECTION)'
+                    scriptType: bash
+                    scriptLocation: inlineScript
+                    inlineScript: |
+                      set -euo pipefail
+
+                      TAG=$(Build.BuildId)
+                      ACR_SERVER=$(az acr show --name $(ACR_NAME) --query loginServer -o tsv)
+
+                      az acr build \
+                        --registry $(ACR_NAME) \
+                        --image $(REPO_NAME):$TAG \
+                        --image $(REPO_NAME):latest \
+                        $(Build.SourcesDirectory)
+
+                      az containerapp update \
+                        --name $(CONTAINER_APP_NAME) \
+                        --resource-group $(RESOURCE_GROUP) \
+                        --image $ACR_SERVER/$(REPO_NAME):$TAG

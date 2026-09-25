@@ -2,10 +2,8 @@ import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@ang
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { CustomersService } from '../../core/services/customers.service';
-import { RegionsService } from '../../core/services/regions.service';
-import { DataTableComponent, TableColumn } from '../../shared/components/data-table/data-table.component';
-import { CustomerDTO, RegionSummary } from '../../core/models';
+import { CustomersService, RegionsService, CustomerDTO, RegionSummary } from '@angular-dashboard/data-access';
+import { DataTableComponent, TableColumn } from '@angular-dashboard/ui';
 
 @Component({
   selector: 'app-customers',
