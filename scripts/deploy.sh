@@ -43,15 +43,40 @@ fi
 # ──────────────────────────────────────────────────────────────────────────────
 # AZURE
 # ──────────────────────────────────────────────────────────────────────────────
+_az_fixup_path() {
+  for _pybin in \
+    /Library/Frameworks/Python.framework/Versions/3.14/bin \
+    /Library/Frameworks/Python.framework/Versions/3.13/bin \
+    /Library/Frameworks/Python.framework/Versions/3.12/bin \
+    /Library/Frameworks/Python.framework/Versions/3.11/bin \
+    "$HOME/.local/bin" \
+    "$HOME/Library/Python/3.14/bin" \
+    "$HOME/Library/Python/3.13/bin" \
+    "$HOME/Library/Python/3.12/bin" \
+    "$HOME/Library/Python/3.11/bin"; do
+    if [[ -x "$_pybin/az" ]]; then
+      export PATH="$_pybin:$PATH"
+      return 0
+    fi
+  done
+  return 1
+}
+
+if ! command -v az >/dev/null 2>&1; then
+  _az_fixup_path
+fi
+
 if ! command -v az >/dev/null 2>&1; then
   printf '\naz CLI not found — installing…\n'
   if command -v pip3 >/dev/null 2>&1; then
     printf 'Trying pip3 install azure-cli (fastest)…\n'
-    pip3 install --quiet azure-cli && export PATH="$HOME/.local/bin:$PATH"
+    pip3 install --quiet azure-cli
+    _az_fixup_path
   fi
   if ! command -v az >/dev/null 2>&1 && command -v brew >/dev/null 2>&1; then
     printf 'pip3 path failed — falling back to Homebrew (slow, compiles from source)…\n'
     brew install azure-cli
+    _az_fixup_path
   fi
   if ! command -v az >/dev/null 2>&1; then
     printf 'Could not install az CLI. Run manually:\n  pip3 install azure-cli\nor: https://docs.microsoft.com/cli/azure/install-azure-cli\n' >&2
