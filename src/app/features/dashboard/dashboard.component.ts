@@ -315,9 +315,9 @@ const FIELD_CLS = 'w-full rounded-md border border-gray-300 bg-white px-2 py-1.5
         </div>
 
         <!-- Custom legend -->
-        <div *ngIf="categoryTotals.length"
+        <div *ngIf="categoryTotals().length"
              class="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs">
-          <span *ngFor="let item of categoryTotals"
+          <span *ngFor="let item of categoryTotals()"
                 class="inline-flex items-center gap-1.5 whitespace-nowrap text-gray-500 dark:text-gray-400">
             <ng-container *ngIf="item.cat !== OTHER_KEY">
               <span aria-hidden class="h-2.5 w-2.5 shrink-0 rounded-sm" [style.backgroundColor]="colorFor(item.cat)"></span>
@@ -513,7 +513,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   readonly brushEnd = signal(0);
   private topCats: string[] = [];
   private colorMap = new Map<string, string>();
-  categoryTotals: Array<{ cat: string; total: number }> = [];
+
+  readonly categoryTotals = signal<Array<{ cat: string; total: number }>>([]);
 
   readonly chartData = signal<ChartConfiguration<'bar'>['data']>({ labels: [], datasets: [] });
   readonly chartOptions: ChartConfiguration<'bar'>['options'] = {
@@ -554,7 +555,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   readonly brushEndDate = computed(() =>
     this.fmtDate(this.allBuckets()[this.brushEnd()]?.date ?? ''));
   readonly othersTotal = computed(() => {
-    const others = this.categoryTotals.find(c => c.cat === OTHER_KEY);
+    const others = this.categoryTotals().find(c => c.cat === OTHER_KEY);
     return others?.total ?? null;
   });
 
@@ -727,11 +728,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.colorMap.clear();
     this.topCats.forEach((cat, i) => this.colorMap.set(cat, PALETTE[i % PALETTE.length]));
 
-    this.categoryTotals = this.topCats.map(cat => ({ cat, total: totals.get(cat) ?? 0 }));
+    const cats = this.topCats.map(cat => ({ cat, total: totals.get(cat) ?? 0 }));
     if (has) {
       const othersSum = sorted.slice(TOP_N).reduce((s, [, v]) => s + v, 0);
-      this.categoryTotals.push({ cat: OTHER_KEY, total: othersSum });
+      cats.push({ cat: OTHER_KEY, total: othersSum });
     }
+    this.categoryTotals.set(cats);
 
     const buckets: AggregateBucket[] = data.map(entry => {
       const bucket: AggregateBucket = { date: entry.date };
