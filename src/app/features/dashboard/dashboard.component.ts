@@ -1,5 +1,5 @@
 import {
-  Component, OnInit, OnDestroy, inject, signal, computed,
+  Component, OnInit, OnDestroy, inject, signal, computed, effect,
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -18,6 +18,8 @@ Chart.register(...registerables);
 
 const TOP_N = 4;
 const OTHER_KEY = 'Others';
+const SLOW_WAKING_MS = 800;
+const IDLE_RESET_MS = 15 * 60 * 1000;
 const PALETTE = ['#6366f1', '#22c55e', '#f59e0b', '#ef4444', '#06b6d4', '#a855f7', '#ec4899'];
 const OTHER_COLOR = '#94a3b8';
 const DRAG_DEBOUNCE_MS = 250;
@@ -91,10 +93,29 @@ const FIELD_CLS = 'w-full rounded-md border border-gray-300 bg-white px-2 py-1.5
   template: `
 <main id="main-content" class="w-full px-5 py-8" aria-label="Dashboard">
 
-  <header class="mb-6 flex items-start justify-between gap-4">
+  <header class="mb-6 flex flex-wrap items-start justify-between gap-3">
     <div>
       <h1 class="text-2xl font-semibold tracking-tight text-gray-900 dark:text-gray-50">Dashboard</h1>
       <p class="text-sm text-gray-500 dark:text-gray-400">Aggregates, search, and order history.</p>
+    </div>
+    <div *ngIf="dbStatus()"
+         class="flex items-center gap-2 rounded-md px-3 py-1.5 text-sm"
+         [style.background]="dbStatus() === 'waking' ? 'rgba(251,191,36,0.12)' : 'rgba(34,197,94,0.12)'"
+         [style.border]="dbStatus() === 'waking' ? '1px solid rgba(251,191,36,0.30)' : '1px solid rgba(34,197,94,0.30)'"
+         [style.color]="dbStatus() === 'waking' ? '#fbbf24' : '#4ade80'">
+      <ng-container *ngIf="dbStatus() === 'waking'">
+        <svg class="h-4 w-4 shrink-0 animate-spin" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-dasharray="60" stroke-dashoffset="20"/>
+        </svg>
+        <span>Backend waking from idle —</span>
+        <span class="font-mono tabular-nums opacity-70">{{ wakeSecs() }}s</span>
+      </ng-container>
+      <ng-container *ngIf="dbStatus() === 'ready'">
+        <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        <span>Backend live — queries back to normal</span>
+      </ng-container>
     </div>
     <app-theme-toggle />
   </header>
@@ -507,6 +528,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
   localMax = '';
   private totalDebounce: ReturnType<typeof setTimeout> | null = null;
 
+  // Backend wake detection
+  readonly dbStatus = signal<'waking' | 'ready' | null>(null);
+  readonly wakeMs = signal(0);
+  readonly wakeSecs = computed(() => (this.wakeMs() / 1000).toFixed(1));
+  private dbWarm = false;
+  private lastActivityAt = 0;
+  private wakeTimer: ReturnType<typeof setTimeout> | null = null;
+  private dbStatusDismiss: ReturnType<typeof setTimeout> | null = null;
+  private wakeIntervalRef: ReturnType<typeof setInterval> | null = null;
+  private wakeStartTime = 0;
+
   // Chart
   readonly chartLoading = signal(false);
   readonly showOthers = signal(false);
@@ -599,6 +631,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private brushDebounce: ReturnType<typeof setTimeout> | null = null;
 
+  constructor() {
+    effect(() => {
+      const status = this.dbStatus();
+      if (status === 'waking') {
+        this.wakeStartTime = Date.now();
+        this.wakeMs.set(30_000);
+        this.wakeIntervalRef = setInterval(() => {
+          this.wakeMs.set(Math.max(0, 30_000 - (Date.now() - this.wakeStartTime)));
+        }, 100);
+      } else {
+        if (this.wakeIntervalRef) { clearInterval(this.wakeIntervalRef); this.wakeIntervalRef = null; }
+        this.wakeMs.set(0);
+      }
+    });
+  }
+
   ngOnInit(): void {
     this.regionsSvc.list().subscribe(r => this.regions.set(r));
     this.loadChart();
@@ -608,6 +656,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     if (this.brushDebounce) clearTimeout(this.brushDebounce);
     if (this.totalDebounce) clearTimeout(this.totalDebounce);
+    if (this.wakeTimer) clearTimeout(this.wakeTimer);
+    if (this.dbStatusDismiss) clearTimeout(this.dbStatusDismiss);
+    if (this.wakeIntervalRef) clearInterval(this.wakeIntervalRef);
   }
 
   // ── Sidebar ───────────────────────────────────────────────────────────
@@ -698,6 +749,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const f = this.filters();
     const from = this.allDates() ? ALL_DATES_FROM : (f.from || this.defaultFrom());
     const to = this.allDates() ? this.defaultTo() : (f.to || this.defaultTo());
+
+    const timeSinceLast = this.lastActivityAt > 0 ? Date.now() - this.lastActivityAt : Infinity;
+    if (this.dbWarm && timeSinceLast > IDLE_RESET_MS) this.dbWarm = false;
+    if (!this.dbWarm && this.dbStatus() === null) {
+      this.wakeTimer = setTimeout(() => this.dbStatus.set('waking'), SLOW_WAKING_MS);
+    }
+
     this.chartLoading.set(true);
     this.aggSvc.get(from, to, TOP_N + 1, {
       q: this.searchQuery() || null,
@@ -707,11 +765,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
       maxTotal: f.totalMax || null,
     }).subscribe({
       next: (res) => {
+        this.clearWakeTimer();
+        this.lastActivityAt = Date.now();
+        if (this.dbStatus() === 'waking') {
+          this.dbStatus.set('ready');
+          this.dbStatusDismiss = setTimeout(() => { this.dbStatus.set(null); this.dbWarm = true; }, 2500);
+        } else {
+          this.dbWarm = true;
+        }
         this.buildChart(res.data ?? []);
         this.chartLoading.set(false);
       },
-      error: () => this.chartLoading.set(false),
+      error: () => { this.clearWakeTimer(); this.chartLoading.set(false); },
     });
+  }
+
+  private clearWakeTimer(): void {
+    if (this.wakeTimer) { clearTimeout(this.wakeTimer); this.wakeTimer = null; }
   }
 
   private buildChart(data: DailyAggregate[]): void {
