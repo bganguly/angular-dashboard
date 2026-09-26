@@ -303,10 +303,9 @@ const FIELD_CLS = 'w-full rounded-md border border-gray-300 bg-white px-2 py-1.5
               {{ brushStartDate() }} → {{ brushEndDate() }}<span class="ml-2 text-gray-400">drag slider to narrow</span>
             </p>
           </div>
-          <span *ngIf="chartLoading()" class="text-xs text-indigo-500" aria-live="polite">updating…</span>
         </header>
 
-        <!-- Loading / empty state -->
+        <!-- Loading / empty state (initial — no data yet) -->
         <div *ngIf="chartLoading() && !chartData().labels?.length"
              class="flex h-72 flex-col items-center justify-center gap-2 text-sm text-gray-400" aria-live="polite">
           <span class="h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-indigo-500 dark:border-gray-700 dark:border-t-indigo-400"
@@ -319,6 +318,13 @@ const FIELD_CLS = 'w-full rounded-md border border-gray-300 bg-white px-2 py-1.5
 
         <!-- Chart canvas -->
         <div *ngIf="chartData().datasets.length" style="height:288px; position:relative;">
+          <!-- Re-fetch overlay spinner -->
+          <div *ngIf="chartLoading()"
+               class="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-white/60 dark:bg-gray-900/60"
+               aria-live="polite">
+            <span class="h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-indigo-500 dark:border-gray-700 dark:border-t-indigo-400"
+                  role="status" aria-label="Updating chart"></span>
+          </div>
           <canvas baseChart
                   [data]="chartData()"
                   [options]="chartOptions"
