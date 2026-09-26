@@ -93,32 +93,25 @@ const FIELD_CLS = 'w-full rounded-md border border-gray-300 bg-white px-2 py-1.5
   template: `
 <main id="main-content" class="w-full px-5 py-8" aria-label="Dashboard">
 
-  <header class="mb-6 flex flex-wrap items-start justify-between gap-3">
-    <div>
-      <h1 class="text-2xl font-semibold tracking-tight text-gray-900 dark:text-gray-50">Dashboard</h1>
-      <p class="text-sm text-gray-500 dark:text-gray-400">Aggregates, search, and order history.</p>
-    </div>
-    <div *ngIf="dbStatus()"
-         class="flex items-center gap-2 rounded-md px-3 py-1.5 text-sm"
-         [style.background]="dbStatus() === 'waking' ? 'rgba(251,191,36,0.12)' : 'rgba(34,197,94,0.12)'"
-         [style.border]="dbStatus() === 'waking' ? '1px solid rgba(251,191,36,0.30)' : '1px solid rgba(34,197,94,0.30)'"
-         [style.color]="dbStatus() === 'waking' ? '#fbbf24' : '#4ade80'">
-      <ng-container *ngIf="dbStatus() === 'waking'">
-        <svg class="h-4 w-4 shrink-0 animate-spin" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-dasharray="60" stroke-dashoffset="20"/>
-        </svg>
-        <span>Backend waking from idle —</span>
-        <span class="font-mono tabular-nums opacity-70">{{ wakeSecs() }}s</span>
-      </ng-container>
-      <ng-container *ngIf="dbStatus() === 'ready'">
-        <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <polyline points="20 6 9 17 4 12"/>
-        </svg>
-        <span>Backend live — queries back to normal</span>
-      </ng-container>
-    </div>
-    <app-theme-toggle />
-  </header>
+  <div *ngIf="dbStatus()"
+       class="mb-4 flex items-center gap-2 rounded-md px-3 py-1.5 text-sm w-fit"
+       [style.background]="dbStatus() === 'waking' ? 'rgba(251,191,36,0.12)' : 'rgba(34,197,94,0.12)'"
+       [style.border]="dbStatus() === 'waking' ? '1px solid rgba(251,191,36,0.30)' : '1px solid rgba(34,197,94,0.30)'"
+       [style.color]="dbStatus() === 'waking' ? '#fbbf24' : '#4ade80'">
+    <ng-container *ngIf="dbStatus() === 'waking'">
+      <svg class="h-4 w-4 shrink-0 animate-spin" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-dasharray="60" stroke-dashoffset="20"/>
+      </svg>
+      <span>Backend waking from idle —</span>
+      <span class="font-mono tabular-nums opacity-70">{{ wakeSecs() }}s</span>
+    </ng-container>
+    <ng-container *ngIf="dbStatus() === 'ready'">
+      <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+      <span>Backend live — queries back to normal</span>
+    </ng-container>
+  </div>
 
   <div class="flex flex-col gap-6 lg:flex-row">
 
