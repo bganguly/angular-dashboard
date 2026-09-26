@@ -722,10 +722,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
         totals.set(cat, (totals.get(cat) ?? 0) + (c.totalOrders ?? 0));
       }
     }
-    const sorted = [...totals.entries()].sort((a, b) => b[1] - a[1]);
+
+    // Exclude the backend's pre-aggregated Others so it never lands in topCats
+    const sorted = [...totals.entries()]
+      .filter(([cat]) => cat !== OTHER_KEY)
+      .sort((a, b) => b[1] - a[1]);
+
     this.topCats = sorted.slice(0, TOP_N).map(([cat]) => cat);
     const topSet = new Set(this.topCats);
-    const has = sorted.length > TOP_N;
+
+    const backendOthers = totals.get(OTHER_KEY) ?? 0;
+    const has = backendOthers > 0 || sorted.length > TOP_N;
     this.hasOthers.set(has);
 
     this.colorMap.clear();
@@ -733,8 +740,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     const cats = this.topCats.map(cat => ({ cat, total: totals.get(cat) ?? 0 }));
     if (has) {
-      const othersSum = sorted.slice(TOP_N).reduce((s, [, v]) => s + v, 0);
-      cats.push({ cat: OTHER_KEY, total: othersSum });
+      const namedOthersSum = sorted.slice(TOP_N).reduce((s, [, v]) => s + v, 0);
+      cats.push({ cat: OTHER_KEY, total: backendOthers + namedOthersSum });
     }
     this.categoryTotals.set(cats);
 
@@ -743,7 +750,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       for (const cat of this.topCats) bucket[cat] = 0;
       if (has) bucket[OTHER_KEY] = 0;
       for (const [cat, c] of Object.entries(entry.categories ?? {})) {
-        const key = topSet.has(cat) ? cat : has ? OTHER_KEY : null;
+        // backend's Others key and any named cat not in topSet both fold into Others
+        const key = topSet.has(cat) ? cat : (has ? OTHER_KEY : null);
         if (key) bucket[key] = (bucket[key] as number) + (c.totalOrders ?? 0);
       }
       return bucket;
