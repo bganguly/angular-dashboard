@@ -772,7 +772,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         } else {
           this.dbWarm = true;
         }
-        this.buildChart(res.data ?? []);
+        this.buildChart(res.data ?? [], res.totalOrders);
         this.chartLoading.set(false);
       },
       error: () => { this.clearWakeTimer(); this.chartLoading.set(false); },
@@ -783,7 +783,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (this.wakeTimer) { clearTimeout(this.wakeTimer); this.wakeTimer = null; }
   }
 
-  private buildChart(data: DailyAggregate[]): void {
+  private buildChart(data: DailyAggregate[], apiTotal?: number): void {
     this.showOthers.set(false);
     const totals = new Map<string, number>();
     for (const day of data) {
@@ -809,8 +809,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     const cats = this.topCats.map(cat => ({ cat, total: totals.get(cat) ?? 0 }));
     if (has) {
-      const namedOthersSum = sorted.slice(TOP_N).reduce((s, [, v]) => s + v, 0);
-      cats.push({ cat: OTHER_KEY, total: backendOthers + namedOthersSum });
+      const topOrdersSum = cats.reduce((s, c) => s + c.total, 0);
+      const summedTotal = backendOthers + sorted.reduce((s, [, v]) => s + v, 0);
+      const matchedOrders = apiTotal ?? summedTotal;
+      cats.push({ cat: OTHER_KEY, total: Math.max(0, matchedOrders - topOrdersSum) });
     }
     this.categoryTotals.set(cats);
 
