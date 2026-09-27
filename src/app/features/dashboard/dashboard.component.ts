@@ -816,13 +816,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.topCats.forEach((cat, i) => this.colorMap.set(cat, PALETTE[i % PALETTE.length]));
 
     const allCatsSum = backendOthers + sorted.reduce((s, [, v]) => s + v, 0);
-    this.chartTotal.set(apiTotal ?? allCatsSum);
+    this.chartTotal.set(allCatsSum);
 
     const cats = this.topCats.map(cat => ({ cat, total: totals.get(cat) ?? 0 }));
     if (has) {
       const topOrdersSum = cats.reduce((s, c) => s + c.total, 0);
-      const matchedOrders = apiTotal ?? allCatsSum;
-      cats.push({ cat: OTHER_KEY, total: Math.max(0, matchedOrders - topOrdersSum) });
+      cats.push({ cat: OTHER_KEY, total: Math.max(0, allCatsSum - topOrdersSum) });
     }
     this.categoryTotals.set(cats);
 

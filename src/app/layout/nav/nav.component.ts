@@ -9,7 +9,6 @@ import { ThemeToggleComponent } from '@angular-dashboard/ui';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <header class="border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
-      <a class="visually-hidden-focusable" href="#main-content">Skip to main content</a>
       <div class="flex w-full items-center justify-between px-5 py-3">
         <div class="flex items-center gap-6">
           <a routerLink="/" class="text-lg font-bold tracking-tight text-gray-900 dark:text-white">
