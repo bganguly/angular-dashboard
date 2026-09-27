@@ -523,7 +523,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   readonly filters = signal<DashFilters>({
     status: [],
     regionCodes: [],
-    from: (() => { const d = new Date(); d.setDate(d.getDate() - 30); return d.toISOString().slice(0, 10); })(),
+    from: '2020-01-01',
     to: new Date().toISOString().slice(0, 10),
     totalMin: '',
     totalMax: '',
@@ -993,9 +993,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private defaultFrom(): string {
-    const d = new Date();
-    d.setDate(d.getDate() - 30);
-    return d.toISOString().slice(0, 10);
+    return '2020-01-01';
   }
 
   private defaultTo(): string {
