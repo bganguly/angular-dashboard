@@ -351,10 +351,17 @@ const FIELD_CLS = 'w-full rounded-md border border-gray-300 bg-white px-2 py-1.5
                    class="h-3.5 w-3.5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                    aria-label="Show others bar series" />
             Others
-            <span *ngIf="showOthers() && othersTotal() !== null" class="font-medium tabular-nums text-gray-900 dark:text-gray-100">
+            <span *ngIf="othersTotal() !== null" class="font-medium tabular-nums text-gray-900 dark:text-gray-100">
               {{ othersTotal() | number }}
             </span>
           </label>
+          <span class="inline-flex items-center gap-1.5 whitespace-nowrap border-l border-gray-200 pl-4 font-medium text-gray-500 dark:border-gray-700 dark:text-gray-400">
+            Total
+            <span class="font-medium tabular-nums text-gray-900 dark:text-gray-100">
+              <span *ngIf="chartLoading(); else totalNum" class="inline-block h-3 w-10 animate-pulse rounded bg-gray-200 align-middle dark:bg-gray-700"></span>
+              <ng-template #totalNum>{{ (chartTotal() ?? 0) | number }}</ng-template>
+            </span>
+          </span>
         </div>
 
         <!-- Brush slider -->
@@ -549,6 +556,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private colorMap = new Map<string, string>();
 
   readonly categoryTotals = signal<Array<{ cat: string; total: number }>>([]);
+  readonly chartTotal = signal<number | null>(null);
 
   readonly chartData = signal<ChartConfiguration<'bar'>['data']>({ labels: [], datasets: [] });
   readonly chartOptions: ChartConfiguration<'bar'>['options'] = {
@@ -807,11 +815,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.colorMap.clear();
     this.topCats.forEach((cat, i) => this.colorMap.set(cat, PALETTE[i % PALETTE.length]));
 
+    const allCatsSum = backendOthers + sorted.reduce((s, [, v]) => s + v, 0);
+    this.chartTotal.set(apiTotal ?? allCatsSum);
+
     const cats = this.topCats.map(cat => ({ cat, total: totals.get(cat) ?? 0 }));
     if (has) {
       const topOrdersSum = cats.reduce((s, c) => s + c.total, 0);
-      const summedTotal = backendOthers + sorted.reduce((s, [, v]) => s + v, 0);
-      const matchedOrders = apiTotal ?? summedTotal;
+      const matchedOrders = apiTotal ?? allCatsSum;
       cats.push({ cat: OTHER_KEY, total: Math.max(0, matchedOrders - topOrdersSum) });
     }
     this.categoryTotals.set(cats);
