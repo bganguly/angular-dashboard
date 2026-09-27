@@ -105,11 +105,16 @@ printf '  Subscription : %s\n' "$AZ_SUBSCRIPTION"
 printf '  Location     : %s\n' "$AZ_LOCATION"
 printf '  Name prefix  : %s\n' "$NAME_PREFIX"
 
-BACKEND_ENV="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../java-implementations/springboot-dashboard-backend" 2>/dev/null && pwd)/.env.gcp.full"
+BACKEND_ENV="$(cd "$ROOT_DIR/../../java-implementations/springboot-dashboard-backend" 2>/dev/null && pwd)/.env.gcp.full"
 
 if [[ -z "${BACKEND_URL:-}" && -f "$BACKEND_ENV" ]]; then
   BACKEND_URL=$(grep -i 'CLOUD_RUN_URL=' "$BACKEND_ENV" | head -1 | cut -d= -f2-)
   printf '  Backend URL  : %s (from springboot-dashboard-backend/.env.gcp.full)\n' "$BACKEND_URL"
+fi
+
+if [[ -z "${BACKEND_URL:-}" && -f "$ROOT_DIR/.env.azure" ]]; then
+  BACKEND_URL=$(grep '^BACKEND_URL=' "$ROOT_DIR/.env.azure" | cut -d= -f2-)
+  printf '  Backend URL  : %s (from .env.azure)\n' "$BACKEND_URL"
 fi
 
 if [[ -z "${BACKEND_URL:-}" ]]; then
