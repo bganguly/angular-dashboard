@@ -8,6 +8,14 @@ import { ThemeToggleComponent } from '@angular-dashboard/ui';
   imports: [RouterLink, RouterLinkActive, ThemeToggleComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
+    <a
+      href="https://bganguly.github.io/#angular_dashboard"
+      (click)="goToPortfolio($event)"
+      class="fixed top-3 left-3 z-50 inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-medium no-underline transition-colors"
+      style="background:rgba(0,0,0,0.65);border:1px solid rgba(255,255,255,0.12);color:#d4d4d8"
+      (mouseenter)="$event.currentTarget.style.color='#fff'"
+      (mouseleave)="$event.currentTarget.style.color='#d4d4d8'"
+    >← Portfolio</a>
     <header class="border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
       <div class="flex w-full items-center justify-between px-5 py-3">
         <div class="flex items-center gap-6">
@@ -69,4 +77,11 @@ import { ThemeToggleComponent } from '@angular-dashboard/ui';
 })
 export class NavComponent {
   readonly mobileOpen = signal(false);
+
+  goToPortfolio(e: MouseEvent) {
+    e.preventDefault();
+    const url = 'https://bganguly.github.io/#angular_dashboard';
+    try { if (window.opener && !window.opener.closed) { window.opener.location.href = url; window.close(); return; } } catch (_) {}
+    window.location.href = url;
+  }
 }
