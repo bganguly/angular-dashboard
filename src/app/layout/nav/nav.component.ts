@@ -11,7 +11,7 @@ import { ThemeToggleComponent } from '@angular-dashboard/ui';
     <a
       href="https://bganguly.github.io/#angular_dashboard"
       (click)="goToPortfolio($event)"
-      class="fixed top-3 left-3 z-50 inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-medium no-underline transition-colors text-zinc-300 hover:text-white"
+      class="fixed top-1 left-3 z-50 inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-medium no-underline transition-colors text-zinc-300 hover:text-white"
       style="background:rgba(0,0,0,0.65);border:1px solid rgba(255,255,255,0.12)"
     >← Portfolio</a>
     <header class="border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
