@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AggregateResult } from '../models';
+import { environment } from '../../../environments/environment';
 
 export interface AggregateFilters {
   q?: string | null;
@@ -30,6 +31,6 @@ export class AggregatesService {
     if (extra?.regionCode) params = params.set('regionCode', extra.regionCode);
     if (extra?.minTotal) params = params.set('minTotal', extra.minTotal);
     if (extra?.maxTotal) params = params.set('maxTotal', extra.maxTotal);
-    return this.http.get<AggregateResult>('/api/aggregates', { params });
+    return this.http.get<AggregateResult>(`${environment.apiBase}/api/aggregates`, { params });
   }
 }

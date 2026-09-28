@@ -51,38 +51,24 @@ stages:
               artifactName: 'angular-dashboard-dist'
 
   - stage: Deploy
-    displayName: 'Deploy to Azure Container Apps'
+    displayName: 'Deploy to Azure Static Web Apps'
     dependsOn: CI
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
     jobs:
-      - deployment: push_image
-        displayName: 'Build image via ACR Tasks'
+      - deployment: deploy_static
+        displayName: 'Deploy pre-built dist to Azure Static Web Apps'
         environment: 'production'
         strategy:
           runOnce:
             deploy:
               steps:
-                - checkout: self
+                - download: current
+                  artifact: angular-dashboard-dist
 
-                - task: AzureCLI@2
-                  displayName: 'az acr build → Container App update'
+                - task: AzureStaticWebApp@0
+                  displayName: 'Deploy to Azure Static Web Apps'
                   inputs:
-                    azureSubscription: '$(AZ_SERVICE_CONNECTION)'
-                    scriptType: bash
-                    scriptLocation: inlineScript
-                    inlineScript: |
-                      set -euo pipefail
-
-                      TAG=$(Build.BuildId)
-                      ACR_SERVER=$(az acr show --name $(ACR_NAME) --query loginServer -o tsv)
-
-                      az acr build \
-                        --registry $(ACR_NAME) \
-                        --image $(REPO_NAME):$TAG \
-                        --image $(REPO_NAME):latest \
-                        $(Build.SourcesDirectory)
-
-                      az containerapp update \
-                        --name $(CONTAINER_APP_NAME) \
-                        --resource-group $(RESOURCE_GROUP) \
-                        --image $ACR_SERVER/$(REPO_NAME):$TAG
+                    azure_static_web_apps_api_token: '$(AZURE_STATIC_WEB_APPS_API_TOKEN)'
+                    app_location: '$(Pipeline.Workspace)/angular-dashboard-dist'
+                    skip_app_build: true
+                    output_location: ''

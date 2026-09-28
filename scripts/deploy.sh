@@ -6,7 +6,7 @@ INFRA_DIR="$ROOT_DIR/infra"
 
 printf '\n=== angular-dashboard ===\n\n'
 printf '  [1] Local  — ng serve on localhost:4200 (no Azure cost)\n'
-printf '  [2] Azure  — Azure Container Apps (scales to zero)\n'
+printf '  [2] Azure  — Azure Static Web Apps (always-on CDN, free tier)\n'
 printf '\nChoice [1/2, default 2]: '
 read -r _MODE
 case "${_MODE:-2}" in
@@ -98,33 +98,13 @@ if ! command -v terraform >/dev/null 2>&1; then
 fi
 
 printf '\n=== deployment config ===\n'
-AZ_SUBSCRIPTION=$(az account show --query id -o tsv)
-AZ_LOCATION="${AZ_LOCATION:-eastus}"
+AZ_LOCATION="${AZ_LOCATION:-eastus2}"
 NAME_PREFIX="${NAME_PREFIX:-ang-dash}"
-printf '  Subscription : %s\n' "$AZ_SUBSCRIPTION"
 printf '  Location     : %s\n' "$AZ_LOCATION"
 printf '  Name prefix  : %s\n' "$NAME_PREFIX"
 
-BACKEND_ENV="$(cd "$ROOT_DIR/../../java-implementations/springboot-dashboard-backend" 2>/dev/null && pwd)/.env.gcp.full"
-
-if [[ -z "${BACKEND_URL:-}" && -f "$BACKEND_ENV" ]]; then
-  BACKEND_URL=$(grep -i 'CLOUD_RUN_URL=' "$BACKEND_ENV" | head -1 | cut -d= -f2-)
-  printf '  Backend URL  : %s (from springboot-dashboard-backend/.env.gcp.full)\n' "$BACKEND_URL"
-fi
-
-if [[ -z "${BACKEND_URL:-}" && -f "$ROOT_DIR/.env.azure" ]]; then
-  BACKEND_URL=$(grep '^BACKEND_URL=' "$ROOT_DIR/.env.azure" | cut -d= -f2-)
-  printf '  Backend URL  : %s (from .env.azure)\n' "$BACKEND_URL"
-fi
-
-if [[ -z "${BACKEND_URL:-}" ]]; then
-  printf '\nCould not auto-detect backend URL.\nRun the springboot-dashboard-backend deploy first, or set BACKEND_URL manually:\n'
-  printf '  BACKEND_URL=https://your-backend ./scripts/deploy.sh\n' >&2
-  exit 1
-fi
-
 printf '\n=== registering Azure resource providers (idempotent) ===\n'
-for _ns in Microsoft.App Microsoft.ContainerRegistry Microsoft.OperationalInsights; do
+for _ns in Microsoft.Web; do
   _state=$(az provider show --namespace "$_ns" --query registrationState -o tsv 2>/dev/null || true)
   if [[ "$_state" != "Registered" ]]; then
     printf '  Registering %s…\n' "$_ns"
@@ -134,53 +114,27 @@ for _ns in Microsoft.App Microsoft.ContainerRegistry Microsoft.OperationalInsigh
   fi
 done
 
+printf '\n=== building Angular app ===\n'
+cd "$ROOT_DIR"
+npm ci --prefer-offline 2>/dev/null || npm ci
+npm run build:prod
+
+printf '\n=== provisioning Azure Static Web Apps via Terraform ===\n'
 cd "$INFRA_DIR"
 terraform init -input=false
-
-ACR_NAME=$(terraform output -raw acr_login_server 2>/dev/null || true)
-[[ "$ACR_NAME" != *".azurecr.io" ]] && ACR_NAME=""
-
-if [[ -z "$ACR_NAME" ]]; then
-  printf '\n=== provisioning ACR (first deploy only) ===\n'
-  terraform apply -input=false -auto-approve \
-    -var="name_prefix=${NAME_PREFIX}" \
-    -var="location=${AZ_LOCATION}" \
-    -var="backend_url=${BACKEND_URL}" \
-    -var="frontend_image=mcr.microsoft.com/azuredocs/aci-helloworld:latest"
-  ACR_NAME=$(terraform output -raw acr_login_server)
-fi
-
-_shasum() { shasum -a 256 "$@" 2>/dev/null || sha256sum "$@" 2>/dev/null; }
-TAG=$(find "$ROOT_DIR/src" "$ROOT_DIR/Dockerfile" "$ROOT_DIR/package.json" \
-    -type f 2>/dev/null | sort | xargs cat 2>/dev/null | _shasum | cut -c1-16 || true)
-TAG="${TAG:-$(date +%Y%m%d%H%M%S)}"
-
-REPO="${NAME_PREFIX}-frontend"
-IMAGE="${ACR_NAME}/${REPO}:${TAG}"
-
-_IMG_EXISTS=$(az acr repository show-tags --name "${ACR_NAME%%.*}" \
-  --repository "$REPO" --query "[?@=='${TAG}']" -o tsv 2>/dev/null || true)
-
-if [[ -n "$_IMG_EXISTS" ]]; then
-  printf '\n  Image %s already exists — skipping build.\n' "$TAG"
-else
-  printf '\n=== building image via ACR Tasks ===\n'
-  printf '  Image: %s\n' "$IMAGE"
-  az acr build \
-    --registry "${ACR_NAME%%.*}" \
-    --image "${REPO}:${TAG}" \
-    --image "${REPO}:latest" \
-    "$ROOT_DIR"
-fi
-
-printf '\n=== deploying via Terraform ===\n'
 terraform apply -input=false -auto-approve \
   -var="name_prefix=${NAME_PREFIX}" \
-  -var="location=${AZ_LOCATION}" \
-  -var="backend_url=${BACKEND_URL}" \
-  -var="frontend_image=${IMAGE}"
+  -var="location=${AZ_LOCATION}"
 
-FRONTEND_URL=$(terraform output -raw frontend_url 2>/dev/null || true)
+FRONTEND_URL=$(terraform output -raw frontend_url)
+DEPLOY_TOKEN=$(terraform output -raw deploy_token)
+
+printf '\n=== deploying to Azure Static Web Apps ===\n'
+cd "$ROOT_DIR"
+npx --yes @azure/static-web-apps-cli@latest deploy dist/angular-dashboard/browser \
+  --deployment-token "$DEPLOY_TOKEN" \
+  --env production
+
 ENV_FILE="$ROOT_DIR/.env.azure"
-printf 'FRONTEND_URL=%s\nBACKEND_URL=%s\n' "$FRONTEND_URL" "$BACKEND_URL" > "$ENV_FILE"
+printf 'FRONTEND_URL=%s\n' "$FRONTEND_URL" > "$ENV_FILE"
 printf '\nDone. Frontend URL:\n  %s\n' "$FRONTEND_URL"

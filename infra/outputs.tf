@@ -1,8 +1,10 @@
 output "frontend_url" {
-  description = "Public HTTPS URL of the Angular Container App"
-  value       = "https://${azurerm_container_app.app.ingress[0].fqdn}"
+  description = "Public HTTPS URL of the Angular Static Web App"
+  value       = "https://${azurerm_static_site.spa.default_host_name}"
 }
 
-output "acr_login_server" {
-  value = azurerm_container_registry.acr.login_server
+output "deploy_token" {
+  description = "Deployment API key — used by swa CLI and CI pipelines"
+  value       = azurerm_static_site.spa.api_key
+  sensitive   = true
 }

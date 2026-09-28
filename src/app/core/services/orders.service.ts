@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { OrderListResult, OrderFilters } from '../models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class OrdersService {
@@ -20,6 +21,6 @@ export class OrdersService {
     if (filters.pageSize) params = params.set('pageSize', String(filters.pageSize));
     if (filters.sort) params = params.set('sort', filters.sort);
     if (filters.dir) params = params.set('dir', filters.dir);
-    return this.http.get<OrderListResult>('/api/orders', { params });
+    return this.http.get<OrderListResult>(`${environment.apiBase}/api/orders`, { params });
   }
 }

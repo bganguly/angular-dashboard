@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { CustomerListResult } from '../models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class CustomersService {
@@ -13,6 +14,6 @@ export class CustomersService {
     if (opts.limit) params = params.set('limit', String(opts.limit));
     if (opts.q) params = params.set('q', opts.q);
     if (opts.regionId != null) params = params.set('regionId', String(opts.regionId));
-    return this.http.get<CustomerListResult>('/api/customers', { params });
+    return this.http.get<CustomerListResult>(`${environment.apiBase}/api/customers`, { params });
   }
 }
