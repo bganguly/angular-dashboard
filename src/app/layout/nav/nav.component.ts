@@ -15,7 +15,7 @@ import { ThemeToggleComponent } from '@angular-dashboard/ui';
       style="background:rgba(0,0,0,0.65);border:1px solid rgba(255,255,255,0.12)"
     >← Portfolio</a>
     <header class="border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
-      <div class="flex w-full items-center justify-between px-5 py-3">
+      <div class="flex w-full items-center justify-between px-5 pt-8 pb-3">
         <div class="flex items-center gap-6">
           <a routerLink="/" class="text-lg font-bold tracking-tight text-gray-900 dark:text-white">
             Order Dashboard

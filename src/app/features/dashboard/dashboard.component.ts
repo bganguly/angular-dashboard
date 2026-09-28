@@ -546,7 +546,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private wakeStartTime = 0;
 
   // Chart
-  readonly chartLoading = signal(false);
+  readonly chartLoading = signal(true);
   readonly showOthers = signal(false);
   readonly hasOthers = signal(false);
   readonly allBuckets = signal<AggregateBucket[]>([]);
@@ -602,7 +602,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   });
 
   // Orders
-  readonly ordersLoading = signal(false);
+  readonly ordersLoading = signal(true);
   readonly orders = signal<OrderDTO[]>([]);
   readonly total = signal(0);
   readonly totalPages = signal(0);
