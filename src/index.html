@@ -9,44 +9,112 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
   </head>
   <style>
-    .app-loading {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      background: #0f172a;
-      color: #94a3b8;
-      font-family: ui-sans-serif, system-ui, sans-serif;
-      gap: 20px;
-    }
-    .app-loading__spinner {
-      width: 44px;
-      height: 44px;
-      border: 3px solid rgba(148,163,184,0.15);
-      border-top-color: #38bdf8;
-      border-radius: 50%;
-      animation: app-spin 0.8s linear infinite;
-    }
-    .app-loading__title {
-      font-size: 1rem;
-      font-weight: 600;
-      color: #e2e8f0;
-      letter-spacing: 0.01em;
-    }
-    .app-loading__sub {
-      font-size: 0.78rem;
-      color: #64748b;
-      margin-top: -12px;
-    }
-    @keyframes app-spin { to { transform: rotate(360deg); } }
+    *,*::before,*::after{box-sizing:border-box}
+    body{margin:0;font-family:ui-sans-serif,system-ui,sans-serif;background:#fafafa}
+    @media(prefers-color-scheme:dark){body{background:#000}}
+    .sk-nav{position:sticky;top:0;z-index:10;border-bottom:1px solid #e5e7eb;background:#fff;padding:0 20px}
+    @media(prefers-color-scheme:dark){.sk-nav{background:#111827;border-color:#1f2937}}
+    .sk-nav-inner{display:flex;align-items:center;justify-content:space-between;height:56px;gap:16px}
+    .sk-pill{height:12px;border-radius:6px;background:#e5e7eb;animation:sk-pulse 1.4s ease-in-out infinite}
+    @media(prefers-color-scheme:dark){.sk-pill{background:#374151}}
+    .sk-circle{border-radius:50%;background:#e5e7eb;animation:sk-pulse 1.4s ease-in-out infinite}
+    @media(prefers-color-scheme:dark){.sk-circle{background:#374151}}
+    .sk-spinner{width:32px;height:32px;border-radius:50%;border:2px solid #d1d5db;border-top-color:#6366f1;animation:sk-spin 0.8s linear infinite}
+    @media(prefers-color-scheme:dark){.sk-spinner{border-color:#374151;border-top-color:#6366f1}}
+    .sk-body{display:flex;gap:24px;padding:32px 20px;max-width:100%}
+    .sk-sidebar{width:256px;flex-shrink:0;border:1px solid #e5e7eb;border-radius:8px;background:#fff;padding:16px;display:flex;flex-direction:column;gap:16px}
+    @media(prefers-color-scheme:dark){.sk-sidebar{background:#111827;border-color:#1f2937}}
+    .sk-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:24px}
+    .sk-card{border:1px solid #e5e7eb;border-radius:8px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+    @media(prefers-color-scheme:dark){.sk-card{background:#111827;border-color:#1f2937}}
+    .sk-card-head{padding:16px 16px 12px;border-bottom:1px solid #f3f4f6}
+    @media(prefers-color-scheme:dark){.sk-card-head{border-color:#1f2937}}
+    .sk-chart-body{height:288px;display:flex;align-items:center;justify-content:center}
+    .sk-table-head{display:grid;grid-template-columns:60px 1fr 90px 80px 100px 100px 1fr;gap:8px;padding:8px 12px;border-bottom:1px solid #f3f4f6}
+    @media(prefers-color-scheme:dark){.sk-table-head{border-color:#1f2937}}
+    .sk-table-body{display:flex;align-items:center;justify-content:center;height:200px}
+    @media(max-width:1023px){.sk-sidebar{display:none}.sk-body{flex-direction:column}}
+    @keyframes sk-pulse{0%,100%{opacity:1}50%{opacity:.4}}
+    @keyframes sk-spin{to{transform:rotate(360deg)}}
   </style>
   <body>
     <app-root>
-      <div class="app-loading">
-        <div class="app-loading__spinner"></div>
-        <p class="app-loading__title">Order Dashboard</p>
-        <p class="app-loading__sub">Loading&hellip;</p>
+      <!-- nav -->
+      <div class="sk-nav">
+        <div class="sk-nav-inner">
+          <div style="display:flex;align-items:center;gap:24px">
+            <div class="sk-pill" style="width:120px;animation-delay:0s"></div>
+            <div class="sk-pill" style="width:70px;animation-delay:.1s"></div>
+            <div class="sk-pill" style="width:60px;animation-delay:.2s"></div>
+            <div class="sk-pill" style="width:80px;animation-delay:.3s"></div>
+          </div>
+          <div class="sk-circle" style="width:28px;height:28px;animation-delay:.1s"></div>
+        </div>
+      </div>
+
+      <!-- body: sidebar + main -->
+      <div class="sk-body">
+
+        <!-- sidebar -->
+        <div class="sk-sidebar">
+          <div class="sk-pill" style="width:50px;height:14px;animation-delay:0s"></div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div class="sk-pill" style="width:40px;height:10px;animation-delay:.1s"></div>
+            <div class="sk-pill" style="width:100%;height:10px;animation-delay:.15s"></div>
+            <div class="sk-pill" style="width:100%;height:10px;animation-delay:.2s"></div>
+            <div class="sk-pill" style="width:100%;height:10px;animation-delay:.25s"></div>
+            <div class="sk-pill" style="width:100%;height:10px;animation-delay:.3s"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div class="sk-pill" style="width:50px;height:10px;animation-delay:.2s"></div>
+            <div class="sk-pill" style="width:100%;height:28px;border-radius:4px;animation-delay:.25s"></div>
+            <div class="sk-pill" style="width:100%;height:80px;border-radius:4px;animation-delay:.3s"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div class="sk-pill" style="width:70px;height:10px;animation-delay:.3s"></div>
+            <div class="sk-pill" style="width:100%;height:28px;border-radius:4px;animation-delay:.35s"></div>
+            <div class="sk-pill" style="width:100%;height:28px;border-radius:4px;animation-delay:.4s"></div>
+          </div>
+        </div>
+
+        <!-- main: chart card + table card -->
+        <div class="sk-main">
+
+          <!-- chart card -->
+          <div class="sk-card">
+            <div class="sk-card-head">
+              <div class="sk-pill" style="width:90px;height:14px;animation-delay:.05s"></div>
+              <div class="sk-pill" style="width:180px;height:10px;margin-top:6px;animation-delay:.1s"></div>
+            </div>
+            <div class="sk-chart-body">
+              <div class="sk-spinner"></div>
+            </div>
+          </div>
+
+          <!-- orders table card -->
+          <div class="sk-card">
+            <div class="sk-card-head" style="padding:16px 24px 12px">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+                <div class="sk-pill" style="width:60px;height:14px;animation-delay:.05s"></div>
+                <div class="sk-pill" style="width:80px;height:10px;animation-delay:.1s"></div>
+              </div>
+              <div class="sk-pill" style="width:100%;height:36px;border-radius:20px;animation-delay:.1s"></div>
+            </div>
+            <div class="sk-table-head">
+              <div class="sk-pill" style="height:10px;animation-delay:.1s"></div>
+              <div class="sk-pill" style="height:10px;animation-delay:.15s"></div>
+              <div class="sk-pill" style="height:10px;animation-delay:.2s"></div>
+              <div class="sk-pill" style="height:10px;animation-delay:.25s"></div>
+              <div class="sk-pill" style="height:10px;animation-delay:.3s"></div>
+              <div class="sk-pill" style="height:10px;animation-delay:.35s"></div>
+              <div class="sk-pill" style="height:10px;animation-delay:.4s"></div>
+            </div>
+            <div class="sk-table-body">
+              <div class="sk-spinner"></div>
+            </div>
+          </div>
+
+        </div>
       </div>
     </app-root>
   </body>
