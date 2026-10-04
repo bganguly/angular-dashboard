@@ -11,7 +11,7 @@ import {
   DailyAggregate, OrderDTO, RegionSummary, OrderStatus,
 } from '@angular-dashboard/data-access';
 import {
-  PaginationComponent, StatusBadgeComponent, ThemeToggleComponent,
+  PaginationComponent, StatusBadgeComponent,
 } from '@angular-dashboard/ui';
 
 Chart.register(...registerables);
@@ -49,7 +49,7 @@ const FIELD_CLS = 'w-full rounded-md border border-gray-300 bg-white px-2 py-1.5
   standalone: true,
   imports: [
     CommonModule, FormsModule, BaseChartDirective,
-    PaginationComponent, StatusBadgeComponent, ThemeToggleComponent,
+    PaginationComponent, StatusBadgeComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: [`
