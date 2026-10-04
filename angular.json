@@ -73,6 +73,7 @@
             "configDir": ".storybook",
             "browserTarget": "angular-dashboard:build",
             "tsConfig": "tsconfig.storybook.json",
+            "styles": ["src/styles.css"],
             "port": 6006,
             "compodoc": false
           }
@@ -83,6 +84,7 @@
             "configDir": ".storybook",
             "browserTarget": "angular-dashboard:build",
             "tsConfig": "tsconfig.storybook.json",
+            "styles": ["src/styles.css"],
             "outputDir": "dist/storybook",
             "compodoc": false
           }
