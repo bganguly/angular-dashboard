@@ -1,0 +1,259 @@
+{
+  "version": "6.0",
+  "nxVersion": "20.8.4",
+  "pathMappings": {
+    "@angular-dashboard/ui": [
+      "libs/ui/src/index.ts"
+    ],
+    "@angular-dashboard/data-access": [
+      "libs/data-access/src/index.ts"
+    ]
+  },
+  "nxJsonPlugins": [],
+  "fileMap": {
+    "projectFileMap": {
+      "@angular-dashboard/data-access": [
+        {
+          "file": "libs/data-access/project.json",
+          "hash": "8648587626050424662"
+        },
+        {
+          "file": "libs/data-access/src/index.ts",
+          "hash": "14637650710453591315"
+        },
+        {
+          "file": "libs/data-access/tsconfig.lib.json",
+          "hash": "7964619227944179782"
+        }
+      ],
+      "@angular-dashboard/ui": [
+        {
+          "file": "libs/ui/project.json",
+          "hash": "600340199987570627"
+        },
+        {
+          "file": "libs/ui/src/index.ts",
+          "hash": "5389458087001339157"
+        },
+        {
+          "file": "libs/ui/tsconfig.lib.json",
+          "hash": "7964619227944179782"
+        }
+      ]
+    },
+    "nonProjectFiles": [
+      {
+        "file": ".gitignore",
+        "hash": "11580581330987601932"
+      },
+      {
+        "file": ".storybook/main.ts",
+        "hash": "8539192818320634186"
+      },
+      {
+        "file": ".storybook/preview.ts",
+        "hash": "14869809524323401337"
+      },
+      {
+        "file": "README.md",
+        "hash": "16185169608527979106"
+      },
+      {
+        "file": "angular.json",
+        "hash": "16919589807027014841"
+      },
+      {
+        "file": "azure-pipelines.yml",
+        "hash": "3422891951053972947"
+      },
+      {
+        "file": "infra/main.tf",
+        "hash": "11589213611587312145"
+      },
+      {
+        "file": "infra/outputs.tf",
+        "hash": "10818454734404047896"
+      },
+      {
+        "file": "infra/variables.tf",
+        "hash": "13908862522959137457"
+      },
+      {
+        "file": "jest.config.ts",
+        "hash": "515689943506119041"
+      },
+      {
+        "file": "nx.json",
+        "hash": "12500771901770412408"
+      },
+      {
+        "file": "package-lock.json",
+        "hash": "13256915325090304481"
+      },
+      {
+        "file": "package.json",
+        "hash": "2306591419817323819"
+      },
+      {
+        "file": "postcss.config.js",
+        "hash": "8055263870272897227"
+      },
+      {
+        "file": "public/staticwebapp.config.json",
+        "hash": "6770108910168450303"
+      },
+      {
+        "file": "scripts/deploy.sh",
+        "hash": "5450666132817220374"
+      },
+      {
+        "file": "scripts/infra-down.sh",
+        "hash": "16827173425116605550"
+      },
+      {
+        "file": "setup-jest.ts",
+        "hash": "17711435995618823417"
+      },
+      {
+        "file": "src/app/app.component.ts",
+        "hash": "415883772885733237"
+      },
+      {
+        "file": "src/app/app.config.ts",
+        "hash": "13510437168405267733"
+      },
+      {
+        "file": "src/app/app.routes.ts",
+        "hash": "1284441979983960513"
+      },
+      {
+        "file": "src/app/core/models/index.ts",
+        "hash": "2015070167806322106"
+      },
+      {
+        "file": "src/app/core/services/aggregates.service.ts",
+        "hash": "3097037959466376381"
+      },
+      {
+        "file": "src/app/core/services/customers.service.ts",
+        "hash": "14042115159680376136"
+      },
+      {
+        "file": "src/app/core/services/orders.service.spec.ts",
+        "hash": "10630536116938434731"
+      },
+      {
+        "file": "src/app/core/services/orders.service.ts",
+        "hash": "18101526820826505308"
+      },
+      {
+        "file": "src/app/core/services/regions.service.ts",
+        "hash": "16096599056351014058"
+      },
+      {
+        "file": "src/app/features/customers/customers.component.ts",
+        "hash": "7175889306732753308"
+      },
+      {
+        "file": "src/app/features/dashboard/dashboard.component.spec.ts",
+        "hash": "699240120319995039"
+      },
+      {
+        "file": "src/app/features/dashboard/dashboard.component.ts",
+        "hash": "12120843957407442970"
+      },
+      {
+        "file": "src/app/features/orders/orders.component.spec.ts",
+        "hash": "14630142726500014883"
+      },
+      {
+        "file": "src/app/features/orders/orders.component.ts",
+        "hash": "16524386195886994453"
+      },
+      {
+        "file": "src/app/layout/nav/nav.component.ts",
+        "hash": "12753490964294604180"
+      },
+      {
+        "file": "src/app/shared/components/data-table/data-table.component.spec.ts",
+        "hash": "1356694788456983830"
+      },
+      {
+        "file": "src/app/shared/components/data-table/data-table.component.ts",
+        "hash": "15011507054931109866"
+      },
+      {
+        "file": "src/app/shared/components/kpi-card/kpi-card.component.ts",
+        "hash": "15474727026420626887"
+      },
+      {
+        "file": "src/app/shared/components/pagination/pagination.component.ts",
+        "hash": "16529438308677920244"
+      },
+      {
+        "file": "src/app/shared/components/status-badge/status-badge.component.ts",
+        "hash": "13782214138205480020"
+      },
+      {
+        "file": "src/app/shared/components/theme-toggle/theme-toggle.component.ts",
+        "hash": "7637352802211355489"
+      },
+      {
+        "file": "src/environments/environment.prod.ts",
+        "hash": "12965512086154362359"
+      },
+      {
+        "file": "src/environments/environment.ts",
+        "hash": "145796957587720246"
+      },
+      {
+        "file": "src/index.html",
+        "hash": "14094222638403102279"
+      },
+      {
+        "file": "src/main.ts",
+        "hash": "2633615247295277217"
+      },
+      {
+        "file": "src/stories/data-table.stories.ts",
+        "hash": "17208564591797856214"
+      },
+      {
+        "file": "src/stories/kpi-card.stories.ts",
+        "hash": "9904107071273267421"
+      },
+      {
+        "file": "src/stories/pagination.stories.ts",
+        "hash": "12767275552158022927"
+      },
+      {
+        "file": "src/stories/status-badge.stories.ts",
+        "hash": "16123629021686300407"
+      },
+      {
+        "file": "src/styles.css",
+        "hash": "2164971213115606583"
+      },
+      {
+        "file": "src/styles.scss",
+        "hash": "9820145614383682069"
+      },
+      {
+        "file": "tailwind.config.js",
+        "hash": "1489777230758875288"
+      },
+      {
+        "file": "tsconfig.app.json",
+        "hash": "1495594532973432592"
+      },
+      {
+        "file": "tsconfig.json",
+        "hash": "16695533919658466091"
+      },
+      {
+        "file": "tsconfig.spec.json",
+        "hash": "18049835198379684389"
+      }
+    ]
+  }
+}

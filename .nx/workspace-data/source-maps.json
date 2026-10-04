@@ -1,0 +1,78 @@
+{
+  "libs/data-access": {
+    "root": [
+      "libs/data-access/project.json",
+      "nx/core/project-json"
+    ],
+    "name": [
+      "libs/data-access/project.json",
+      "nx/core/project-json"
+    ],
+    "$schema": [
+      "libs/data-access/project.json",
+      "nx/core/project-json"
+    ],
+    "projectType": [
+      "libs/data-access/project.json",
+      "nx/core/project-json"
+    ],
+    "sourceRoot": [
+      "libs/data-access/project.json",
+      "nx/core/project-json"
+    ],
+    "prefix": [
+      "libs/data-access/project.json",
+      "nx/core/project-json"
+    ],
+    "tags": [
+      "libs/data-access/project.json",
+      "nx/core/project-json"
+    ],
+    "tags.type:data-access": [
+      "libs/data-access/project.json",
+      "nx/core/project-json"
+    ],
+    "tags.scope:shared": [
+      "libs/data-access/project.json",
+      "nx/core/project-json"
+    ]
+  },
+  "libs/ui": {
+    "root": [
+      "libs/ui/project.json",
+      "nx/core/project-json"
+    ],
+    "name": [
+      "libs/ui/project.json",
+      "nx/core/project-json"
+    ],
+    "$schema": [
+      "libs/ui/project.json",
+      "nx/core/project-json"
+    ],
+    "projectType": [
+      "libs/ui/project.json",
+      "nx/core/project-json"
+    ],
+    "sourceRoot": [
+      "libs/ui/project.json",
+      "nx/core/project-json"
+    ],
+    "prefix": [
+      "libs/ui/project.json",
+      "nx/core/project-json"
+    ],
+    "tags": [
+      "libs/ui/project.json",
+      "nx/core/project-json"
+    ],
+    "tags.type:ui": [
+      "libs/ui/project.json",
+      "nx/core/project-json"
+    ],
+    "tags.scope:shared": [
+      "libs/ui/project.json",
+      "nx/core/project-json"
+    ]
+  }
+}
