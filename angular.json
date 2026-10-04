@@ -72,7 +72,8 @@
           "options": {
             "configDir": ".storybook",
             "browserTarget": "angular-dashboard:build",
-            "port": 6006
+            "port": 6006,
+            "compodoc": false
           }
         },
         "build-storybook": {
@@ -80,7 +81,8 @@
           "options": {
             "configDir": ".storybook",
             "browserTarget": "angular-dashboard:build",
-            "outputDir": "dist/storybook"
+            "outputDir": "dist/storybook",
+            "compodoc": false
           }
         }
       }
