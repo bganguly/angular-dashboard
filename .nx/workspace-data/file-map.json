@@ -12,6 +12,20 @@
   "nxJsonPlugins": [],
   "fileMap": {
     "projectFileMap": {
+      "@angular-dashboard/ui": [
+        {
+          "file": "libs/ui/project.json",
+          "hash": "600340199987570627"
+        },
+        {
+          "file": "libs/ui/src/index.ts",
+          "hash": "14241106070241618056"
+        },
+        {
+          "file": "libs/ui/tsconfig.lib.json",
+          "hash": "7964619227944179782"
+        }
+      ],
       "@angular-dashboard/data-access": [
         {
           "file": "libs/data-access/project.json",
@@ -23,20 +37,6 @@
         },
         {
           "file": "libs/data-access/tsconfig.lib.json",
-          "hash": "7964619227944179782"
-        }
-      ],
-      "@angular-dashboard/ui": [
-        {
-          "file": "libs/ui/project.json",
-          "hash": "600340199987570627"
-        },
-        {
-          "file": "libs/ui/src/index.ts",
-          "hash": "5389458087001339157"
-        },
-        {
-          "file": "libs/ui/tsconfig.lib.json",
           "hash": "7964619227944179782"
         }
       ]
@@ -160,7 +160,7 @@
       },
       {
         "file": "src/app/features/dashboard/dashboard.component.ts",
-        "hash": "12120843957407442970"
+        "hash": "6524624001779153048"
       },
       {
         "file": "src/app/features/orders/orders.component.spec.ts",
@@ -181,10 +181,6 @@
       {
         "file": "src/app/shared/components/data-table/data-table.component.ts",
         "hash": "15011507054931109866"
-      },
-      {
-        "file": "src/app/shared/components/kpi-card/kpi-card.component.ts",
-        "hash": "15474727026420626887"
       },
       {
         "file": "src/app/shared/components/pagination/pagination.component.ts",
@@ -217,10 +213,6 @@
       {
         "file": "src/stories/data-table.stories.ts",
         "hash": "17208564591797856214"
-      },
-      {
-        "file": "src/stories/kpi-card.stories.ts",
-        "hash": "9904107071273267421"
       },
       {
         "file": "src/stories/pagination.stories.ts",

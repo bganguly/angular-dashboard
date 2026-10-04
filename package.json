@@ -7,9 +7,7 @@
     "build:prod": "ng build --configuration production",
     "test": "jest --passWithNoTests",
     "test:coverage": "jest --coverage --passWithNoTests",
-    "lint": "ng lint",
-    "storybook": "ng run angular-dashboard:storybook",
-    "build-storybook": "ng run angular-dashboard:build-storybook"
+    "lint": "ng lint"
   },
   "dependencies": {
     "@angular/animations": "^19.0.0",
@@ -34,10 +32,6 @@
     "@angular-devkit/build-angular": "^19.0.0",
     "@angular/cli": "^19.0.0",
     "@angular/compiler-cli": "^19.0.0",
-    "@storybook/addon-a11y": "^8.4.0",
-    "@storybook/addon-essentials": "^8.4.0",
-    "@storybook/angular": "^8.4.0",
-    "@storybook/test": "^8.4.0",
     "@types/jest": "^29.5.12",
     "@types/node": "^18.18.0",
     "autoprefixer": "^10.6.1",
@@ -46,7 +40,6 @@
     "jest-preset-angular": "^14.2.4",
     "nx": "^20.0.0",
     "postcss": "^8.5.28",
-    "storybook": "^8.4.0",
     "tailwindcss": "^3.4.19",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",

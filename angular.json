@@ -66,28 +66,6 @@
             "tsConfig": "tsconfig.spec.json",
             "setupFilesAfterFramework": ["<rootDir>/setup-jest.ts"]
           }
-        },
-        "storybook": {
-          "builder": "@storybook/angular:start-storybook",
-          "options": {
-            "configDir": ".storybook",
-            "browserTarget": "angular-dashboard:build",
-            "tsConfig": "tsconfig.storybook.json",
-            "styles": ["src/styles.css"],
-            "port": 6006,
-            "compodoc": false
-          }
-        },
-        "build-storybook": {
-          "builder": "@storybook/angular:build-storybook",
-          "options": {
-            "configDir": ".storybook",
-            "browserTarget": "angular-dashboard:build",
-            "tsConfig": "tsconfig.storybook.json",
-            "styles": ["src/styles.css"],
-            "outputDir": "dist/storybook",
-            "compodoc": false
-          }
         }
       }
     }
