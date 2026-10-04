@@ -21,7 +21,7 @@ const ROWS: SampleRow[] = [
   { id: 3, name: 'Carol White', status: 'PENDING', total: 9.95 },
 ];
 
-const meta: Meta<DataTableComponent<SampleRow>> = {
+const meta: Meta<DataTableComponent> = {
   title: 'UI/DataTable',
   component: DataTableComponent,
   tags: ['autodocs'],
@@ -33,7 +33,7 @@ const meta: Meta<DataTableComponent<SampleRow>> = {
 };
 
 export default meta;
-type Story = StoryObj<DataTableComponent<SampleRow>>;
+type Story = StoryObj<DataTableComponent>;
 
 export const Default: Story = {
   args: { columns: COLUMNS, rows: ROWS, loading: false },
