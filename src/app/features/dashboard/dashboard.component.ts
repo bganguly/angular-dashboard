@@ -11,7 +11,7 @@ import {
   DailyAggregate, OrderDTO, RegionSummary, OrderStatus,
 } from '@angular-dashboard/data-access';
 import {
-  PaginationComponent, StatusBadgeComponent,
+  PaginationComponent,
 } from '@angular-dashboard/ui';
 
 Chart.register(...registerables);
@@ -49,7 +49,7 @@ const FIELD_CLS = 'w-full rounded-md border border-gray-300 bg-white px-2 py-1.5
   standalone: true,
   imports: [
     CommonModule, FormsModule, BaseChartDirective,
-    PaginationComponent, StatusBadgeComponent,
+    PaginationComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: [`
@@ -397,7 +397,7 @@ const FIELD_CLS = 'w-full rounded-md border border-gray-300 bg-white px-2 py-1.5
 
         <div class="px-6 pt-5 pb-3">
           <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
-            <h2 class="text-base font-semibold text-gray-900 dark:text-gray-50">Orders</h2>
+            <h2 class="text-base font-semibold text-gray-900 dark:text-gray-50">Search orders</h2>
             <p class="text-sm text-gray-500 dark:text-gray-400" aria-live="polite">
               {{ total() | number }}{{ approximate() ? ' (approx.)' : '' }} results
             </p>
@@ -430,34 +430,29 @@ const FIELD_CLS = 'w-full rounded-md border border-gray-300 bg-white px-2 py-1.5
                   Customer
                   <span *ngIf="sortKey() === 'customer'" class="ml-0.5 text-indigo-500">{{ sortDir() === 'asc' ? '▲' : '▼' }}</span>
                 </th>
-                <th class="cursor-pointer px-3 py-2 text-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                    (click)="onSort('status')">
-                  Status
-                  <span *ngIf="sortKey() === 'status'" class="ml-0.5 text-indigo-500">{{ sortDir() === 'asc' ? '▲' : '▼' }}</span>
-                </th>
+                <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400">Items</th>
                 <th class="cursor-pointer px-3 py-2 text-right text-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                     (click)="onSort('total')">
                   Total
                   <span *ngIf="sortKey() === 'total'" class="ml-0.5 text-indigo-500">{{ sortDir() === 'asc' ? '▲' : '▼' }}</span>
                 </th>
-                <th class="px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400">Region</th>
+                <th class="px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400">Notes</th>
                 <th class="cursor-pointer px-3 py-2 text-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                     (click)="onSort('placedAt')">
-                  Date
+                  Placed
                   <span *ngIf="sortKey() === 'placedAt'" class="ml-0.5 text-indigo-500">{{ sortDir() === 'asc' ? '▲' : '▼' }}</span>
                 </th>
-                <th class="px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400">Notes</th>
               </tr>
             </thead>
             <tbody>
               <tr *ngIf="ordersLoading()">
-                <td colspan="7" class="py-10 text-center">
+                <td colspan="5" class="py-10 text-center">
                   <span class="inline-block h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-indigo-500 dark:border-gray-700 dark:border-t-indigo-400"
                         role="status" aria-label="Loading"></span>
                 </td>
               </tr>
               <tr *ngIf="!ordersLoading() && orders().length === 0">
-                <td colspan="7" class="py-12 text-center text-sm text-gray-400 dark:text-gray-500">
+                <td colspan="5" class="py-12 text-center text-sm text-gray-400 dark:text-gray-500">
                   No results found.
                 </td>
               </tr>
@@ -466,12 +461,11 @@ const FIELD_CLS = 'w-full rounded-md border border-gray-300 bg-white px-2 py-1.5
                   tabindex="0">
                 <td class="px-3 py-2 align-top text-gray-900 dark:text-gray-100">{{ order.id }}</td>
                 <td class="px-3 py-2 align-top text-gray-900 dark:text-gray-100">{{ order.customer.firstName }} {{ order.customer.lastName }}</td>
-                <td class="px-3 py-2 align-top"><app-status-badge [status]="order.status" /></td>
+                <td class="px-3 py-2 align-top text-right tabular-nums text-gray-900 dark:text-gray-100">{{ order.items?.length ?? 0 }}</td>
                 <td class="px-3 py-2 align-top text-right tabular-nums text-gray-900 dark:text-gray-100">{{ order.total | currency }}</td>
-                <td class="px-3 py-2 align-top text-gray-700 dark:text-gray-300">{{ order.region.name }}</td>
-                <td class="px-3 py-2 align-top text-gray-700 dark:text-gray-300">{{ order.placedAt | date:'mediumDate' }}</td>
                 <td class="px-3 py-2 align-top max-w-[180px] truncate text-gray-500 dark:text-gray-400"
-                    [title]="order.notes ?? ''">{{ order.notes ?? '—' }}</td>
+                    [title]="order.notes ?? ''">{{ order.notes ?? '' }}</td>
+                <td class="px-3 py-2 align-top text-gray-700 dark:text-gray-300">{{ order.placedAt | date:'mediumDate' }}</td>
               </tr>
             </tbody>
           </table>
