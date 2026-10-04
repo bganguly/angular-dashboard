@@ -27,7 +27,7 @@ const meta: Meta<DataTableComponent> = {
   tags: ['autodocs'],
   argTypes: {
     loading: { control: 'boolean' },
-    emptyMessage: { control: 'text' },
+    caption: { control: 'text' },
     sortChange: { action: 'sortChange' },
   },
 };
@@ -44,5 +44,5 @@ export const Loading: Story = {
 };
 
 export const Empty: Story = {
-  args: { columns: COLUMNS, rows: [], loading: false, emptyMessage: 'No orders match your filters.' },
+  args: { columns: COLUMNS, rows: [], loading: false, caption: 'No orders match your filters.' },
 };
