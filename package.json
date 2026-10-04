@@ -8,8 +8,8 @@
     "test": "jest --passWithNoTests",
     "test:coverage": "jest --coverage --passWithNoTests",
     "lint": "ng lint",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "storybook": "ng run angular-dashboard:storybook",
+    "build-storybook": "ng run angular-dashboard:build-storybook"
   },
   "dependencies": {
     "@angular/animations": "^19.0.0",

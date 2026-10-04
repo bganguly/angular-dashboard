@@ -66,6 +66,22 @@
             "tsConfig": "tsconfig.spec.json",
             "setupFilesAfterFramework": ["<rootDir>/setup-jest.ts"]
           }
+        },
+        "storybook": {
+          "builder": "@storybook/angular:start-storybook",
+          "options": {
+            "configDir": ".storybook",
+            "browserTarget": "angular-dashboard:build",
+            "port": 6006
+          }
+        },
+        "build-storybook": {
+          "builder": "@storybook/angular:build-storybook",
+          "options": {
+            "configDir": ".storybook",
+            "browserTarget": "angular-dashboard:build",
+            "outputDir": "dist/storybook"
+          }
         }
       }
     }
