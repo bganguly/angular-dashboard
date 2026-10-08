@@ -11,7 +11,7 @@ import { CommonModule } from '@angular/common';
       <ul class="flex items-center gap-1">
         <li>
           <button type="button"
-                  class="flex h-9 items-center rounded-md border border-gray-300 px-3 text-sm hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-700 dark:hover:bg-gray-800"
+                  class="flex h-9 items-center rounded-md border border-gray-300 px-3 text-sm text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
                   [disabled]="page <= 1"
                   (click)="go(page - 1)"
                   aria-label="Previous page">
@@ -23,7 +23,7 @@ import { CommonModule } from '@angular/common';
           <button type="button"
                   [class]="p === page
                     ? 'flex h-9 min-w-9 items-center justify-center rounded-md px-3 text-sm bg-indigo-600 text-white'
-                    : 'flex h-9 min-w-9 items-center justify-center rounded-md px-3 text-sm border border-gray-300 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800'"
+                    : 'flex h-9 min-w-9 items-center justify-center rounded-md px-3 text-sm border border-gray-300 text-gray-700 hover:bg-gray-100 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800'"
                   (click)="go(p)"
                   [attr.aria-label]="'Page ' + p">
             {{ p }}
@@ -31,7 +31,7 @@ import { CommonModule } from '@angular/common';
         </li>
         <li>
           <button type="button"
-                  class="flex h-9 items-center rounded-md border border-gray-300 px-3 text-sm hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-700 dark:hover:bg-gray-800"
+                  class="flex h-9 items-center rounded-md border border-gray-300 px-3 text-sm text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
                   [disabled]="page >= totalPages"
                   (click)="go(page + 1)"
                   aria-label="Next page">
