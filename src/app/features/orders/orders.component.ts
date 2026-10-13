@@ -19,9 +19,7 @@ const SELECT_CLS = 'rounded-md border border-gray-300 bg-white px-2 py-1.5 text-
       <header class="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 class="text-2xl font-semibold tracking-tight text-gray-900 dark:text-gray-50">Orders</h1>
-          <p class="text-sm text-gray-500 dark:text-gray-400" aria-live="polite">
-            {{ total() | number }}{{ approximate() ? ' (approx.)' : '' }} results
-          </p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Search and filter order history.</p>
         </div>
       </header>
 
@@ -87,20 +85,24 @@ const SELECT_CLS = 'rounded-md border border-gray-300 bg-white px-2 py-1.5 text-
         </app-data-table>
       </section>
 
-      <footer class="flex flex-wrap items-center justify-between gap-2">
-        <div class="flex items-center gap-2">
-          <label for="pageSize" class="text-sm text-gray-500 dark:text-gray-400">Rows per page</label>
-          <select id="pageSize" [class]="selectCls"
-                  [value]="pageSize()" (change)="onPageSize($event)" aria-label="Rows per page">
-            <option value="10">10</option>
-            <option value="20">20</option>
-            <option value="50">50</option>
-          </select>
-        </div>
+      <footer class="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <span class="text-xs text-gray-500 dark:text-gray-400">
+          Page {{ page() }} of
+          <ng-container *ngIf="loading(); else totalPagesVal">
+            <span class="inline-block h-3 w-8 animate-pulse rounded bg-gray-200 align-middle dark:bg-gray-700"></span>
+          </ng-container>
+          <ng-template #totalPagesVal>{{ totalPages() }}</ng-template>
+          ·
+          <ng-container *ngIf="loading(); else totalVal">
+            <span class="inline-block h-3 w-14 animate-pulse rounded bg-gray-200 align-middle dark:bg-gray-700"></span>
+          </ng-container>
+          <ng-template #totalVal>{{ total() | number }}</ng-template>
+          <ng-container *ngIf="loading(); else resultsLabel">
+            <span class="inline-block h-3 w-10 animate-pulse rounded bg-gray-200 align-middle dark:bg-gray-700"></span>
+          </ng-container>
+          <ng-template #resultsLabel>{{ approximate() ? 'results (approx.)' : 'results' }}</ng-template>
+        </span>
         <div class="flex items-center gap-3">
-          <span class="text-sm text-gray-500 dark:text-gray-400">
-            Page {{ page() }} of {{ totalPages() }}
-          </span>
           <app-pagination [page]="page()" [totalPages]="totalPages()" (pageChange)="onPage($event)" />
         </div>
       </footer>
