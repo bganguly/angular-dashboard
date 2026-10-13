@@ -103,7 +103,7 @@ const SELECT_CLS = 'rounded-md border border-gray-300 bg-white px-2 py-1.5 text-
           <ng-template #resultsLabel>{{ approximate() ? 'results (approx.)' : 'results' }}</ng-template>
         </span>
         <div class="flex items-center gap-3">
-          <app-pagination [page]="page()" [totalPages]="totalPages()" (pageChange)="onPage($event)" />
+          <app-pagination [page]="page()" [totalPages]="totalPages()" [loading]="loading()" (pageChange)="onPage($event)" />
         </div>
       </footer>
     </main>
