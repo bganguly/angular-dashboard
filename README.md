@@ -12,7 +12,7 @@ Production-grade **Angular 19 / TypeScript** orders dashboard with sub-second se
 | **API Explorer** | https://dash-angular-frontend-77y7e2wykq-uc.a.run.app/api-explorer |
 | **Portfolio demo** | https://bganguly.github.io/#angular_dashboard |
 
-> Azure Container Apps scales to zero when idle; run `deploy.sh` to provision infrastructure and start the service.
+> Azure Container Apps scales to zero when idle; the first request after a period of inactivity may have a slight delay.
 
 ---
 
