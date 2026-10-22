@@ -17,5 +17,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/customers/customers.component').then((m) => m.CustomersComponent),
     title: 'Customers',
   },
+  {
+    path: 'api-explorer',
+    loadComponent: () => import('./features/api-explorer/api-explorer.component').then((m) => m.ApiExplorerComponent),
+    title: 'API Explorer',
+  },
   { path: '**', redirectTo: 'dashboard' },
 ];
