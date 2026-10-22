@@ -135,8 +135,8 @@ async function fetchTimed(url: string): Promise<{ json: unknown; ms: number }> {
                   <td>{{ r['customerName'] ?? r['customer_name'] ?? '—' }}</td>
                   <td>{{ r['status'] }}</td>
                   <td>{{ r['region'] }}</td>
-                  <td>{{ r['totalAmount'] ?? r['total'] ?? '—' | number:'1.2-2' }}</td>
-                  <td>{{ (r['placedAt'] ?? r['placed_at'] ?? '') | slice:0:10 }}</td>
+                  <td>{{ $any(r['totalAmount'] ?? r['total']) | number:'1.2-2' }}</td>
+                  <td>{{ $any(r['placedAt'] ?? r['placed_at'] ?? '') | slice:0:10 }}</td>
                 </tr>
               }
             </table>
@@ -170,8 +170,8 @@ async function fetchTimed(url: string): Promise<{ json: unknown; ms: number }> {
                   <td>{{ r['customerName'] ?? r['customer_name'] ?? '—' }}</td>
                   <td>{{ r['status'] }}</td>
                   <td>{{ r['region'] }}</td>
-                  <td>{{ r['totalAmount'] ?? r['total'] ?? '—' | number:'1.2-2' }}</td>
-                  <td>{{ (r['placedAt'] ?? r['placed_at'] ?? '') | slice:0:10 }}</td>
+                  <td>{{ $any(r['totalAmount'] ?? r['total']) | number:'1.2-2' }}</td>
+                  <td>{{ $any(r['placedAt'] ?? r['placed_at'] ?? '') | slice:0:10 }}</td>
                 </tr>
               }
             </table>
