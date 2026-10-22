@@ -79,7 +79,7 @@ async function fetchTimed(url: string): Promise<{ json: unknown; ms: number }> {
             @if (wakeStatus === 'waking') {
               <div style="display:flex;align-items:center;gap:0.5rem;background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.30);color:#fbbf24;border-radius:0.5rem;padding:0.375rem 0.75rem;font-size:0.75rem">
                 <span class="ae-spinner"></span>
-                Backend waking up —
+                Probing GET /api/orders —
                 <span style="font-family:monospace;margin-left:4px">{{ (wakeMs / 1000).toFixed(1) }}s</span>
               </div>
             }
@@ -349,7 +349,7 @@ export class ApiExplorerComponent implements OnInit, OnDestroy {
       }, 100);
     }, SLOW_WAKING_MS);
 
-    this.http.get('/api/runtime').subscribe({
+    this.http.get('/api/orders?pageSize=10&sort=placedAt&dir=desc').subscribe({
       next: () => this.markReady(),
       error: () => this.markReady(),
     });
