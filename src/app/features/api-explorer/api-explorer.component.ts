@@ -51,10 +51,15 @@ async function fetchTimed(url: string): Promise<{ json: unknown; ms: number }> {
         .ae-date  { background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.10);color:#e4e4e7;border-radius:0.5rem;padding:0.375rem 0.5rem;font-size:0.75rem;font-family:monospace;outline:none;color-scheme:dark }
         .ae-run   { display:inline-flex;align-items:center;gap:0.375rem;padding:0.375rem 1rem;border-radius:0.5rem;background:rgba(99,102,241,0.18);border:1px solid rgba(99,102,241,0.4);color:#a5b4fc;font-size:0.75rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit }
         .ae-run:disabled { opacity:0.5;cursor:not-allowed }
-        .ae-card  { background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:0.75rem;padding:1.25rem;margin-bottom:1rem }
-        .ae-path  { font-family:monospace;font-size:0.8rem;color:#818cf8;font-weight:600;margin-bottom:0.25rem }
-        .ae-sub   { font-size:0.6875rem;color:#52525b;margin-bottom:0.875rem }
-        .ae-row   { display:flex;align-items:flex-start;gap:0.75rem;margin-bottom:0.75rem }
+        .ae-section { border:1px solid rgba(255,255,255,0.07);border-radius:0.75rem;margin-bottom:0.625rem;background:rgba(255,255,255,0.02);overflow:hidden }
+        .ae-hd    { display:flex;align-items:center;gap:0.75rem;padding:0.875rem 1.25rem;cursor:pointer;user-select:none }
+        .ae-hd:hover { background:rgba(255,255,255,0.02) }
+        .ae-get   { font-size:0.6875rem;font-weight:700;font-family:monospace;padding:0.2rem 0.5rem;border-radius:0.375rem;background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.25);color:#4ade80;letter-spacing:.02em;flex-shrink:0 }
+        .ae-path  { font-family:monospace;font-size:0.8125rem;color:#e4e4e7;font-weight:500 }
+        .ae-sub   { font-size:0.75rem;color:#52525b }
+        .ae-chev  { margin-left:auto;color:#52525b;flex-shrink:0;transition:transform 0.18s }
+        .ae-body  { padding:0 1.25rem 1.25rem;border-top:1px solid rgba(255,255,255,0.05) }
+        .ae-ctrl  { display:flex;align-items:flex-start;gap:0.75rem;padding-top:1rem;margin-bottom:0.75rem }
         .ae-params{ display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;flex:1 }
         .ae-param { font-size:0.6875rem;font-family:monospace;padding:0.125rem 0.5rem;border-radius:0.375rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#a1a1aa }
         .ae-meta  { font-size:0.6875rem;color:#71717a;margin-bottom:0.625rem }
@@ -107,172 +112,227 @@ async function fetchTimed(url: string): Promise<{ json: unknown; ms: number }> {
         </p>
       </div>
 
-      <!-- Cards -->
+      <!-- Accordion -->
       <div style="padding:0 1.5rem 4rem;max-width:64rem;margin:0 auto">
 
         <!-- GET /api/orders -->
-        <div class="ae-card">
-          <div class="ae-path">GET /api/orders</div>
-          <div class="ae-sub">Latest orders — paginated, sorted by date descending</div>
-          <div class="ae-row">
-            <div class="ae-params">
-              <span class="ae-param">pageSize=10</span>
-              <span class="ae-param">sort=placedAt</span>
-              <span class="ae-param">dir=desc</span>
-            </div>
-            <button class="ae-run" [disabled]="orders.loading" (click)="runOrders()">
-              @if (orders.loading) { <span class="ae-spinner"></span> Running… } @else { ▶ Run }
-            </button>
+        <div class="ae-section">
+          <div class="ae-hd" (click)="toggle('orders')">
+            <span class="ae-get">GET</span>
+            <span class="ae-path">/api/orders</span>
+            <span class="ae-sub">Latest orders — paginated, sorted by date descending</span>
+            <svg class="ae-chev" [style.transform]="expanded['orders'] ? 'rotate(180deg)' : 'rotate(0)'"
+                 width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
           </div>
-          @if (orders.loading && orders.slow) { <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.6875rem;color:#71717a"><span class="ae-spinner"></span> Service may be waking up…</div> }
-          @if (orders.err) { <div class="ae-err">{{ orders.err }}</div> }
-          @if (orders.result && !orders.loading) {
-            <div class="ae-meta">{{ ordersLabel }} · {{ ordersMs }}ms</div>
-            <table class="ae-tbl">
-              <tr><th>ID</th><th>Customer</th><th>Status</th><th>Region</th><th>Total</th><th>Placed</th></tr>
-              @for (r of ordersRows; track $index) {
-                <tr>
-                  <td>{{ r['id'] }}</td>
-                  <td>{{ r['customerName'] ?? r['customer_name'] ?? '—' }}</td>
-                  <td>{{ r['status'] }}</td>
-                  <td>{{ r['region'] }}</td>
-                  <td>{{ $any(r['totalAmount'] ?? r['total']) | number:'1.2-2' }}</td>
-                  <td>{{ $any(r['placedAt'] ?? r['placed_at'] ?? '') | slice:0:10 }}</td>
-                </tr>
+          @if (expanded['orders']) {
+            <div class="ae-body">
+              <div class="ae-ctrl">
+                <div class="ae-params">
+                  <span class="ae-param">pageSize=10</span>
+                  <span class="ae-param">sort=placedAt</span>
+                  <span class="ae-param">dir=desc</span>
+                </div>
+                <button class="ae-run" [disabled]="orders.loading" (click)="runOrders()">
+                  @if (orders.loading) { <span class="ae-spinner"></span> Running… } @else { ▶ Run }
+                </button>
+              </div>
+              @if (orders.loading && orders.slow) { <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.6875rem;color:#71717a"><span class="ae-spinner"></span> Service may be waking up…</div> }
+              @if (orders.err) { <div class="ae-err">{{ orders.err }}</div> }
+              @if (orders.result && !orders.loading) {
+                <div class="ae-meta">{{ ordersLabel }} · {{ ordersMs }}ms</div>
+                <table class="ae-tbl">
+                  <tr><th>ID</th><th>Customer</th><th>Status</th><th>Region</th><th>Total</th><th>Placed</th></tr>
+                  @for (r of ordersRows; track $index) {
+                    <tr>
+                      <td>{{ r['id'] }}</td>
+                      <td>{{ r['customerName'] ?? r['customer_name'] ?? '—' }}</td>
+                      <td>{{ r['status'] }}</td>
+                      <td>{{ r['region'] }}</td>
+                      <td>{{ $any(r['totalAmount'] ?? r['total']) | number:'1.2-2' }}</td>
+                      <td>{{ $any(r['placedAt'] ?? r['placed_at'] ?? '') | slice:0:10 }}</td>
+                    </tr>
+                  }
+                </table>
+                <pre class="ae-raw">{{ orders.result.json | json }}</pre>
               }
-            </table>
-            <pre class="ae-raw">{{ orders.result.json | json }}</pre>
+            </div>
           }
         </div>
 
         <!-- GET /api/orders?q= -->
-        <div class="ae-card">
-          <div class="ae-path">GET /api/orders?q=…</div>
-          <div class="ae-sub">Full-text search via GIN pg_bigm index — 2-char minimum</div>
-          <div class="ae-row">
-            <div class="ae-params">
-              <input class="ae-input" [(ngModel)]="searchQ" placeholder="e.g. gupta, sara, east…"
-                     (keydown.enter)="runSearch()" style="width:220px" />
-              <span class="ae-param">pageSize=10</span>
-            </div>
-            <button class="ae-run" [disabled]="search.loading || !searchQ.trim()" (click)="runSearch()">
-              @if (search.loading) { <span class="ae-spinner"></span> Running… } @else { ▶ Run }
-            </button>
+        <div class="ae-section">
+          <div class="ae-hd" (click)="toggle('search')">
+            <span class="ae-get">GET</span>
+            <span class="ae-path">/api/orders?q=…</span>
+            <span class="ae-sub">Full-text search via GIN pg_bigm index — 2-char minimum</span>
+            <svg class="ae-chev" [style.transform]="expanded['search'] ? 'rotate(180deg)' : 'rotate(0)'"
+                 width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
           </div>
-          @if (search.loading && search.slow) { <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.6875rem;color:#71717a"><span class="ae-spinner"></span> Service may be waking up…</div> }
-          @if (search.err) { <div class="ae-err">{{ search.err }}</div> }
-          @if (search.result && !search.loading) {
-            <div class="ae-meta">{{ searchLabel }} · {{ searchMs }}ms</div>
-            <table class="ae-tbl">
-              <tr><th>ID</th><th>Customer</th><th>Status</th><th>Region</th><th>Total</th><th>Placed</th></tr>
-              @for (r of searchRows; track $index) {
-                <tr>
-                  <td>{{ r['id'] }}</td>
-                  <td>{{ r['customerName'] ?? r['customer_name'] ?? '—' }}</td>
-                  <td>{{ r['status'] }}</td>
-                  <td>{{ r['region'] }}</td>
-                  <td>{{ $any(r['totalAmount'] ?? r['total']) | number:'1.2-2' }}</td>
-                  <td>{{ $any(r['placedAt'] ?? r['placed_at'] ?? '') | slice:0:10 }}</td>
-                </tr>
+          @if (expanded['search']) {
+            <div class="ae-body">
+              <div class="ae-ctrl">
+                <div class="ae-params">
+                  <input class="ae-input" [(ngModel)]="searchQ" placeholder="e.g. gupta, sara, east…"
+                         (keydown.enter)="runSearch()" style="width:220px" />
+                  <span class="ae-param">pageSize=10</span>
+                </div>
+                <button class="ae-run" [disabled]="search.loading || !searchQ.trim()" (click)="runSearch()">
+                  @if (search.loading) { <span class="ae-spinner"></span> Running… } @else { ▶ Run }
+                </button>
+              </div>
+              @if (search.loading && search.slow) { <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.6875rem;color:#71717a"><span class="ae-spinner"></span> Service may be waking up…</div> }
+              @if (search.err) { <div class="ae-err">{{ search.err }}</div> }
+              @if (search.result && !search.loading) {
+                <div class="ae-meta">{{ searchLabel }} · {{ searchMs }}ms</div>
+                <table class="ae-tbl">
+                  <tr><th>ID</th><th>Customer</th><th>Status</th><th>Region</th><th>Total</th><th>Placed</th></tr>
+                  @for (r of searchRows; track $index) {
+                    <tr>
+                      <td>{{ r['id'] }}</td>
+                      <td>{{ r['customerName'] ?? r['customer_name'] ?? '—' }}</td>
+                      <td>{{ r['status'] }}</td>
+                      <td>{{ r['region'] }}</td>
+                      <td>{{ $any(r['totalAmount'] ?? r['total']) | number:'1.2-2' }}</td>
+                      <td>{{ $any(r['placedAt'] ?? r['placed_at'] ?? '') | slice:0:10 }}</td>
+                    </tr>
+                  }
+                </table>
+                @if (searchRows.length === 0) { <p style="font-size:.75rem;color:#71717a">No results.</p> }
+                <pre class="ae-raw">{{ search.result.json | json }}</pre>
               }
-            </table>
-            @if (searchRows.length === 0) { <p style="font-size:.75rem;color:#71717a">No results.</p> }
-            <pre class="ae-raw">{{ search.result.json | json }}</pre>
+            </div>
           }
         </div>
 
         <!-- GET /api/aggregates -->
-        <div class="ae-card">
-          <div class="ae-path">GET /api/aggregates</div>
-          <div class="ae-sub">Pre-aggregated daily totals by category — millisecond response</div>
-          <div class="ae-row">
-            <div class="ae-params">
-              <span style="font-size:0.6875rem;font-family:monospace;color:#52525b">from</span>
-              <input type="date" class="ae-date" [(ngModel)]="aggFrom" style="width:150px" />
-              <span style="font-size:0.6875rem;font-family:monospace;color:#52525b">to</span>
-              <input type="date" class="ae-date" [(ngModel)]="aggTo" style="width:150px" />
-              <span class="ae-param">topCategories=3</span>
-            </div>
-            <button class="ae-run" [disabled]="agg.loading || !aggFrom || !aggTo" (click)="runAgg()">
-              @if (agg.loading) { <span class="ae-spinner"></span> Running… } @else { ▶ Run }
-            </button>
+        <div class="ae-section">
+          <div class="ae-hd" (click)="toggle('agg')">
+            <span class="ae-get">GET</span>
+            <span class="ae-path">/api/aggregates</span>
+            <span class="ae-sub">Pre-aggregated daily totals by category — millisecond response</span>
+            <svg class="ae-chev" [style.transform]="expanded['agg'] ? 'rotate(180deg)' : 'rotate(0)'"
+                 width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
           </div>
-          @if (agg.loading && agg.slow) { <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.6875rem;color:#71717a"><span class="ae-spinner"></span> Service may be waking up…</div> }
-          @if (agg.err) { <div class="ae-err">{{ agg.err }}</div> }
-          @if (agg.result && !agg.loading) {
-            <div class="ae-meta">{{ aggRows.length }} day{{ aggRows.length !== 1 ? 's' : '' }} · {{ aggFrom }} → {{ aggTo }} · {{ aggMs }}ms</div>
-            <div style="display:flex;gap:1rem;margin-bottom:0.75rem">
-              <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:0.5rem;padding:0.5rem 1rem;text-align:center">
-                <div style="font-size:1.125rem;font-weight:700;color:#f4f4f5">{{ aggOrders | number }}</div>
-                <div style="font-size:0.625rem;color:#52525b;text-transform:uppercase;letter-spacing:.06em">Total Orders</div>
+          @if (expanded['agg']) {
+            <div class="ae-body">
+              <div class="ae-ctrl">
+                <div class="ae-params">
+                  <span style="font-size:0.6875rem;font-family:monospace;color:#52525b">from</span>
+                  <input type="date" class="ae-date" [(ngModel)]="aggFrom" placeholder="from" style="width:150px" />
+                  <span style="font-size:0.6875rem;font-family:monospace;color:#52525b">to</span>
+                  <input type="date" class="ae-date" [(ngModel)]="aggTo" placeholder="to" style="width:150px" />
+                  <span class="ae-param">topCategories=3</span>
+                </div>
+                <button class="ae-run" [disabled]="agg.loading || !aggFrom || !aggTo" (click)="runAgg()">
+                  @if (agg.loading) { <span class="ae-spinner"></span> Running… } @else { ▶ Run }
+                </button>
               </div>
-              <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:0.5rem;padding:0.5rem 1rem;text-align:center">
-                <div style="font-size:1.125rem;font-weight:700;color:#34d399">\${{ aggRevenue | number:'1.0-0' }}</div>
-                <div style="font-size:0.625rem;color:#52525b;text-transform:uppercase;letter-spacing:.06em">Est. Revenue</div>
-              </div>
+              @if (agg.loading && agg.slow) { <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.6875rem;color:#71717a"><span class="ae-spinner"></span> Service may be waking up…</div> }
+              @if (agg.err) { <div class="ae-err">{{ agg.err }}</div> }
+              @if (agg.result && !agg.loading) {
+                <div class="ae-meta">{{ aggRows.length }} day{{ aggRows.length !== 1 ? 's' : '' }} · {{ aggFrom }} → {{ aggTo }} · {{ aggMs }}ms</div>
+                <div style="display:flex;gap:1rem;margin-bottom:0.75rem">
+                  <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:0.5rem;padding:0.5rem 1rem;text-align:center">
+                    <div style="font-size:1.125rem;font-weight:700;color:#f4f4f5">{{ aggOrders | number }}</div>
+                    <div style="font-size:0.625rem;color:#52525b;text-transform:uppercase;letter-spacing:.06em">Total Orders</div>
+                  </div>
+                  <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:0.5rem;padding:0.5rem 1rem;text-align:center">
+                    <div style="font-size:1.125rem;font-weight:700;color:#34d399">\${{ aggRevenue | number:'1.0-0' }}</div>
+                    <div style="font-size:0.625rem;color:#52525b;text-transform:uppercase;letter-spacing:.06em">Est. Revenue</div>
+                  </div>
+                </div>
+                <pre class="ae-raw">{{ agg.result.json | json }}</pre>
+              }
             </div>
-            <pre class="ae-raw">{{ agg.result.json | json }}</pre>
           }
         </div>
 
         <!-- GET /api/customers -->
-        <div class="ae-card">
-          <div class="ae-path">GET /api/customers</div>
-          <div class="ae-sub">Customer list — cursor-paginated</div>
-          <div class="ae-row">
-            <div class="ae-params">
-              <input class="ae-input" [(ngModel)]="custQ" placeholder="e.g. gupta, sara…"
-                     (keydown.enter)="runCustomers()" style="width:200px" />
-              <span class="ae-param">limit=10</span>
-            </div>
-            <button class="ae-run" [disabled]="cust.loading" (click)="runCustomers()">
-              @if (cust.loading) { <span class="ae-spinner"></span> Running… } @else { ▶ Run }
-            </button>
+        <div class="ae-section">
+          <div class="ae-hd" (click)="toggle('cust')">
+            <span class="ae-get">GET</span>
+            <span class="ae-path">/api/customers</span>
+            <span class="ae-sub">Customer list — cursor-paginated</span>
+            <svg class="ae-chev" [style.transform]="expanded['cust'] ? 'rotate(180deg)' : 'rotate(0)'"
+                 width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
           </div>
-          @if (cust.loading && cust.slow) { <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.6875rem;color:#71717a"><span class="ae-spinner"></span> Service may be waking up…</div> }
-          @if (cust.err) { <div class="ae-err">{{ cust.err }}</div> }
-          @if (cust.result && !cust.loading) {
-            <div class="ae-meta">{{ custRows.length }} customer{{ custRows.length !== 1 ? 's' : '' }} returned · {{ custMs }}ms</div>
-            <table class="ae-tbl">
-              <tr><th>ID</th><th>Name</th><th>Email</th><th>Region</th></tr>
-              @for (r of custRows; track $index) {
-                <tr>
-                  <td>{{ r['id'] }}</td>
-                  <td>{{ r['name'] ?? r['customerName'] ?? '—' }}</td>
-                  <td>{{ r['email'] ?? '—' }}</td>
-                  <td>{{ r['region'] ?? '—' }}</td>
-                </tr>
+          @if (expanded['cust']) {
+            <div class="ae-body">
+              <div class="ae-ctrl">
+                <div class="ae-params">
+                  <input class="ae-input" [(ngModel)]="custQ" placeholder="e.g. gupta, sara…"
+                         (keydown.enter)="runCustomers()" style="width:200px" />
+                  <span class="ae-param">limit=10</span>
+                </div>
+                <button class="ae-run" [disabled]="cust.loading" (click)="runCustomers()">
+                  @if (cust.loading) { <span class="ae-spinner"></span> Running… } @else { ▶ Run }
+                </button>
+              </div>
+              @if (cust.loading && cust.slow) { <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.6875rem;color:#71717a"><span class="ae-spinner"></span> Service may be waking up…</div> }
+              @if (cust.err) { <div class="ae-err">{{ cust.err }}</div> }
+              @if (cust.result && !cust.loading) {
+                <div class="ae-meta">{{ custRows.length }} customer{{ custRows.length !== 1 ? 's' : '' }} returned · {{ custMs }}ms</div>
+                <table class="ae-tbl">
+                  <tr><th>ID</th><th>Name</th><th>Email</th><th>Region</th></tr>
+                  @for (r of custRows; track $index) {
+                    <tr>
+                      <td>{{ r['id'] }}</td>
+                      <td>{{ r['name'] ?? r['customerName'] ?? '—' }}</td>
+                      <td>{{ r['email'] ?? '—' }}</td>
+                      <td>{{ r['region'] ?? '—' }}</td>
+                    </tr>
+                  }
+                </table>
+                @if (custRows.length === 0) { <p style="font-size:.75rem;color:#71717a">No results.</p> }
+                <pre class="ae-raw">{{ cust.result.json | json }}</pre>
               }
-            </table>
-            @if (custRows.length === 0) { <p style="font-size:.75rem;color:#71717a">No results.</p> }
-            <pre class="ae-raw">{{ cust.result.json | json }}</pre>
+            </div>
           }
         </div>
 
         <!-- GET /api/regions -->
-        <div class="ae-card">
-          <div class="ae-path">GET /api/regions</div>
-          <div class="ae-sub">All regions — no parameters</div>
-          <div class="ae-row">
-            <div class="ae-params">
-              <p style="font-size:.6875rem;color:#52525b">Returns the full list of regions used for filtering.</p>
-            </div>
-            <button class="ae-run" [disabled]="regions.loading" (click)="runRegions()">
-              @if (regions.loading) { <span class="ae-spinner"></span> Running… } @else { ▶ Run }
-            </button>
+        <div class="ae-section">
+          <div class="ae-hd" (click)="toggle('regions')">
+            <span class="ae-get">GET</span>
+            <span class="ae-path">/api/regions</span>
+            <span class="ae-sub">All regions — no parameters</span>
+            <svg class="ae-chev" [style.transform]="expanded['regions'] ? 'rotate(180deg)' : 'rotate(0)'"
+                 width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
           </div>
-          @if (regions.loading && regions.slow) { <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.6875rem;color:#71717a"><span class="ae-spinner"></span> Service may be waking up…</div> }
-          @if (regions.err) { <div class="ae-err">{{ regions.err }}</div> }
-          @if (regions.result && !regions.loading) {
-            <div class="ae-meta">{{ regionRows.length }} region{{ regionRows.length !== 1 ? 's' : '' }} returned · {{ regionsMs }}ms</div>
-            <div style="display:flex;flex-wrap:wrap;gap:0.375rem;margin-bottom:0.75rem">
-              @for (r of regionRows; track $index) {
-                <span style="font-size:0.6875rem;padding:0.2rem 0.6rem;border-radius:9999px;background:rgba(129,140,248,0.10);border:1px solid rgba(129,140,248,0.25);color:#a5b4fc">
-                  {{ r['name'] ?? r['code'] ?? r['id'] ?? '—' }}
-                </span>
+          @if (expanded['regions']) {
+            <div class="ae-body">
+              <div class="ae-ctrl">
+                <div class="ae-params">
+                  <p style="font-size:.6875rem;color:#52525b">Returns the full list of regions used for filtering.</p>
+                </div>
+                <button class="ae-run" [disabled]="regions.loading" (click)="runRegions()">
+                  @if (regions.loading) { <span class="ae-spinner"></span> Running… } @else { ▶ Run }
+                </button>
+              </div>
+              @if (regions.loading && regions.slow) { <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.6875rem;color:#71717a"><span class="ae-spinner"></span> Service may be waking up…</div> }
+              @if (regions.err) { <div class="ae-err">{{ regions.err }}</div> }
+              @if (regions.result && !regions.loading) {
+                <div class="ae-meta">{{ regionRows.length }} region{{ regionRows.length !== 1 ? 's' : '' }} returned · {{ regionsMs }}ms</div>
+                <div style="display:flex;flex-wrap:wrap;gap:0.375rem;margin-bottom:0.75rem">
+                  @for (r of regionRows; track $index) {
+                    <span style="font-size:0.6875rem;padding:0.2rem 0.6rem;border-radius:9999px;background:rgba(129,140,248,0.10);border:1px solid rgba(129,140,248,0.25);color:#a5b4fc">
+                      {{ r['name'] ?? r['code'] ?? r['id'] ?? '—' }}
+                    </span>
+                  }
+                </div>
+                <pre class="ae-raw">{{ regions.result.json | json }}</pre>
               }
             </div>
-            <pre class="ae-raw">{{ regions.result.json | json }}</pre>
           }
         </div>
 
@@ -298,6 +358,9 @@ export class ApiExplorerComponent implements OnInit, OnDestroy {
   agg     = emptyCard();
   cust    = emptyCard();
   regions = emptyCard();
+
+  expanded: Record<string, boolean> = {};
+  toggle(key: string) { this.expanded[key] = !this.expanded[key]; }
 
   // Inputs
   searchQ = '';
