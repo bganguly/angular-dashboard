@@ -1,6 +1,6 @@
-# angular-dashboard — Angular 19 + TypeScript + Azure Container Apps
+# angular-dashboard — Angular 19 + FastAPI + Azure
 
-Production-grade **Angular 19 / TypeScript** orders dashboard with sub-second search and chart responses across 4 M+ orders. Built as a multi-stage Docker image (Angular → Nginx), deployed to **Azure Container Apps** via **Terraform IaC**. Nginx serves the compiled SPA and proxies `/api/*` to the Spring Boot backend.
+Production-grade **Angular 19 / TypeScript** orders dashboard with sub-second search and chart responses across 4 M+ orders. The Angular SPA is deployed to **Azure Static Web Apps**; the REST API is a **Python FastAPI** backend deployed to **Azure Container Apps**.
 
 ---
 
@@ -9,7 +9,6 @@ Production-grade **Angular 19 / TypeScript** orders dashboard with sub-second se
 | Endpoint | URL |
 |---|---|
 | **Dashboard** | https://salmon-wave-01f721c0f.6.azurestaticapps.net |
-| **API Explorer** | https://dash-angular-frontend-77y7e2wykq-uc.a.run.app/api-explorer |
 | **Portfolio demo** | https://bganguly.github.io/#angular_dashboard |
 
 > Azure Container Apps scales to zero when idle; the first request after a period of inactivity may have a slight delay.
@@ -33,48 +32,40 @@ Production-grade **Angular 19 / TypeScript** orders dashboard with sub-second se
 ┌──────────────────────────────────────────────────────────────────────────┐
 │                           Azure Subscription                             │
 │                                                                          │
-│   Azure Container Registry                                               │
-│   ┌──────────────────┐    ◄── ACR build (deploy.sh)                      │
-│   │  frontend image  │         Angular → Nginx multi-stage               │
-│   └──────────────────┘                                                   │
-│           │ image pull                                                   │
-│           ▼                                                              │
-│   Container Apps Environment                                             │
+│   Azure Static Web Apps                                                  │
 │   ┌──────────────────────────────────────────────────────────────────┐  │
-│   │  Container App: angular-dashboard                                │  │
-│   │  • Nginx (port 80) serves Angular dist + proxies /api/*         │  │
-│   │  • Scales to zero when idle                                      │  │
+│   │  angular-dashboard (SWA)                                         │  │
+│   │  • Compiled Angular SPA served from Azure CDN                    │  │
+│   │  • Free tier — always-on, global edge                            │  │
 │   └──────────────────────────────────────────────────────────────────┘  │
 │                              │ HTTPS (/api/*)                            │
 │   ┌──────────────────────────▼───────────────────────────────────────┐  │
-│   │  Spring Boot Backend (separate repo / deployment)               │  │
-│   │  • REST /api/orders, /api/aggregates, /api/regions              │  │
-│   │  • 4 M+ orders, GIN trigram index, pre-agg summary tables       │  │
+│   │  Azure Container Apps: angular-dashboard-backend                 │  │
+│   │  • FastAPI (Python 3.12) — uvicorn                               │  │
+│   │  • REST: /api/orders, /api/aggregates, /api/customers, /api/regions│  │
+│   │  • 4 M+ orders, ILIKE search on search_text, pre-agg summary tables│  │
+│   │  • Scales to zero when idle                                      │  │
 │   └──────────────────────────────────────────────────────────────────┘  │
 │                                                                          │
-│   Terraform (infra/) manages Container Apps environment + app            │
 └──────────────────────────────────────────────────────────────────────────┘
 
 Deploy flow
 ───────────
 local machine
-  └─ deploy.sh
-       ├─ [1] local   → ng serve on :4200
-       └─ [2] Azure   → az acr build → ACR
-                        → terraform apply (Container Apps)
+  ├─ angular-dashboard/scripts/deploy.sh       → Azure SWA (frontend)
+  └─ angular-dashboard-backend/scripts/deploy.sh → Azure Container Apps (API)
 ```
 
 ### Key design decisions
 
 | Concern | Approach |
 |---|---|
-| **BFF proxy** | Nginx forwards `/api/*` to `BACKEND_URL` env var; browser sees a single origin, no CORS. |
-| **Image build** | `az acr build` — remote build in Azure, no local Docker required. |
-| **Search** | Backend GIN trigram index on denormalized `search_text` column; sub-second on 4 M+ rows. |
-| **Aggregates** | Pre-aggregated summary tables — chart queries never hit raw `orders`. |
-| **Pagination** | Cursor-based navigation (Customers), offset pagination (Orders). |
-| **IaC** | Terraform (`infra/`) — Container Apps environment, app, ACR, Log Analytics declared as code. |
-| **Dark mode** | Tailwind `dark:` class strategy; ThemeToggle component persists preference to `localStorage`. |
+| **Frontend hosting** | Azure Static Web Apps — free tier CDN, no server to manage. |
+| **API backend** | FastAPI on Azure Container Apps — scales to zero, ~$0 when idle. |
+| **Search** | ILIKE on denormalized `search_text` column backed by a GIN trigram index; sub-second on 4 M+ rows. |
+| **Aggregates** | Pre-aggregated `daily_summary` table — chart queries never hit raw `orders`. |
+| **Pagination** | Cursor-based (Customers), offset (Orders). |
+| **Dark mode** | Tailwind `dark:` class strategy; ThemeToggle persists preference to `localStorage`. |
 
 ---
 
@@ -82,49 +73,54 @@ local machine
 
 | Component | Implementation |
 |---|---|
-| **Angular / TypeScript front-end** | Angular 19, TypeScript, Tailwind CSS, ng2-charts (Chart.js) |
-| **BFF layer** | Nginx reverse proxy — `/api/*` → Spring Boot backend |
-| **Serverless / cloud-native** | Azure Container Apps — scales to zero, no node management |
-| **IaC** | Terraform (`infra/`) — Container Apps environment, app, ACR, Log Analytics |
-| **Image build** | `az acr build` — remote Azure build, no local Docker |
+| **Frontend** | Angular 19, TypeScript, Tailwind CSS, ng2-charts (Chart.js) |
+| **Backend API** | Python 3.12, FastAPI, uvicorn, psycopg2 |
+| **Frontend hosting** | Azure Static Web Apps — free tier CDN |
+| **Backend hosting** | Azure Container Apps — scales to zero |
 | **Performance** | Sub-second chart from pre-aggregated tables; sub-second search via GIN trigram index |
+
+---
+
+## Repos
+
+| Service | Location |
+|---|---|
+| **Angular frontend** | `angular-implementations/angular-dashboard/` |
+| **FastAPI backend** | `angular-implementations/angular-dashboard-backend/` |
 
 ---
 
 ## Deployment / Running
 
 ```bash
-./scripts/deploy.sh      # [1] local dev · [2] Azure (Container Apps)
-./scripts/infra-down.sh  # [1] stop local · [2] destroy Azure stack
+# Frontend (Azure Static Web Apps)
+angular-dashboard/scripts/deploy.sh      # [1] local ng serve · [2] Azure SWA
+angular-dashboard/scripts/infra-down.sh  # [1] stop local · [2] destroy Azure stack
+
+# Backend (Azure Container Apps)
+angular-dashboard-backend/scripts/deploy.sh      # [1] local uvicorn :8000 · [2] Azure Container Apps
+angular-dashboard-backend/scripts/infra-down.sh  # [1] kill :8000 · [2] destroy Azure stack
 ```
 
-| Action | Script | Prompt |
-|---|---|---|
-| Start local dev server (port 4200) | `./scripts/deploy.sh` | `[1]` |
-| Deploy to Azure Container Apps | `./scripts/deploy.sh` | `[2]` |
-| Stop local dev server | `./scripts/infra-down.sh` | `[1]` |
-| Teardown Azure stack | `./scripts/infra-down.sh` | `[2]` |
-
-Deploy the Spring Boot backend first — `deploy.sh` reads the backend URL from Terraform outputs to configure Nginx.
+Deploy the FastAPI backend first, then set `apiBase` in `src/environments/environment.prod.ts` to the backend URL before deploying the frontend.
 
 ### Cost
 
 | Resource | Cost |
 |---|---|
-| **Container Apps** | Scale-to-zero — ~$0 when idle |
-| **Azure Container Registry** | Basic tier — ~$5/mo |
-| **Log Analytics** | Pay-per-GB — negligible at demo volume |
+| **Azure Static Web Apps** | Free tier — $0 |
+| **Azure Container Apps** | Scale-to-zero — ~$0 when idle |
 
 ---
 
 ## Scale & Performance
 
-> **4 M+ orders** served with sub-second search and chart responses. Full-text search hits a single GIN trigram index on `search_text`; chart aggregates hit pre-aggregated summary tables — neither touches the raw `orders` table on the hot path.
+> **4 M+ orders** served with sub-second search and chart responses. Full-text search hits a GIN trigram index on `search_text`; chart aggregates hit pre-aggregated summary tables — neither touches the raw `orders` table on the hot path.
 
 ```
-Browser ──HTTPS──► Nginx / Container App ──proxy /api/*──► Spring Boot ──JDBC──► PostgreSQL
-                   angular-dashboard                        backend               4 M+ rows
-                   scales to zero                                                 GIN trigram index
+Browser ──HTTPS──► Angular SPA (Azure SWA) ──HTTPS /api/*──► FastAPI (Container Apps) ──psycopg2──► PostgreSQL
+                   CDN edge                                    scales to zero               4 M+ rows
+                                                                                            GIN trigram index
 ```
 
 ---
@@ -133,7 +129,7 @@ Browser ──HTTPS──► Nginx / Container App ──proxy /api/*──► S
 
 - **Overview chart** — stacked bar chart of daily revenue by product category; date range picker filters the data
 - **Orders table** — paginated (offset), sortable (customer / status / total / date), filter bar (status, region, date range)
-- **Full-text search** — multi-token search across all visible columns via backend GIN trigram index; sub-second on 4 M+ rows
+- **Full-text search** — multi-token search across all visible columns via ILIKE on `search_text`; sub-second on 4 M+ rows
 - **Customers table** — cursor-based pagination (keyset), filter by name/email and region
 - **Dark mode** — system-preference detection; light / dark / system toggle persisted to `localStorage`
-- **BFF proxy** — Nginx forwards `/api/*` to Spring Boot; browser sees a single origin, no CORS
+- **API Explorer** — live endpoint runner built into the Angular app

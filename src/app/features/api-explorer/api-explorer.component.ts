@@ -101,7 +101,7 @@ async function fetchTimed(url: string): Promise<{ json: unknown; ms: number }> {
               </div>
             }
             <span style="font-size:0.6875rem;padding:0.125rem 0.5rem;border-radius:9999px;background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.3);color:#a5b4fc">
-              Angular 19 · Spring Boot · GCP
+              Angular 19 · FastAPI · Azure
             </span>
           </div>
         </div>
@@ -110,10 +110,10 @@ async function fetchTimed(url: string): Promise<{ json: unknown; ms: number }> {
       <!-- Hero -->
       <div style="padding:7rem 1.5rem 2.5rem;max-width:64rem;margin:0 auto">
         <p style="font-size:0.75rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#818cf8;margin-bottom:0.75rem">API Explorer</p>
-        <h1 style="font-size:1.5rem;font-weight:700;color:#f4f4f5;margin-bottom:0.5rem">Angular 19 + Spring Boot</h1>
+        <h1 style="font-size:1.5rem;font-weight:700;color:#f4f4f5;margin-bottom:0.5rem">Angular 19 + FastAPI</h1>
         <p style="font-size:0.875rem;color:#71717a;max-width:42rem">
-          Live endpoints from the Spring Boot REST API backing this Angular dashboard — 4M+ orders dataset.
-          First request may be slow if the Cloud Run instance has scaled to zero.
+          Live endpoints from the FastAPI backend backing this Angular dashboard — 4M+ orders dataset.
+          First request may be slow if the Azure Container Apps instance has scaled to zero.
         </p>
       </div>
 
@@ -173,7 +173,7 @@ async function fetchTimed(url: string): Promise<{ json: unknown; ms: number }> {
           <div class="ae-hd" (click)="toggle('search')">
             <span class="ae-get">GET</span>
             <span class="ae-path">/api/orders?q=…</span>
-            <span class="ae-sub">Full-text search via GIN pg_bigm index — 2-char minimum</span>
+            <span class="ae-sub">Full-text search via ILIKE on search_text column — 2-char minimum</span>
             <svg class="ae-chev" [style.transform]="expanded['search'] ? 'rotate(180deg)' : 'rotate(0)'"
                  width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="6 9 12 15 18 9"/>
