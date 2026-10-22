@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiBase: '',
+  apiBase: 'https://ang-dash-backend.wonderfulcoast-da2b04df.eastus2.azurecontainerapps.io',
 };
