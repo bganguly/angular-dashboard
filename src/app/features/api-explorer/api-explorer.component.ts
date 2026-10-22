@@ -70,6 +70,7 @@ async function fetchTimed(url: string): Promise<{ json: unknown; ms: number }> {
         .ae-tbl td { padding:0.25rem 0.625rem;color:#a1a1aa;border-bottom:1px solid rgba(255,255,255,0.04);font-family:monospace }
         .ae-ms     { display:inline-block;font-size:0.6875rem;font-family:monospace;padding:0.15rem 0.5rem;border-radius:0.375rem;background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.25);color:#fbbf24;letter-spacing:.02em;margin-bottom:0.4rem }
         .ae-ms-fast{ background:rgba(34,197,94,0.12);border-color:rgba(34,197,94,0.25);color:#4ade80 }
+        .ae-ms-slow{ background:rgba(239,68,68,0.12);border-color:rgba(239,68,68,0.25);color:#f87171 }
         .ae-raw-tog { display:inline-block;font-size:0.6875rem;padding:0.2rem 0.625rem;border-radius:0.375rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.10);color:#71717a;cursor:pointer;margin-top:0.625rem;font-family:inherit;line-height:1.4 }
         .ae-raw-tog:hover { color:#a1a1aa }
       </style>
@@ -390,7 +391,7 @@ export class ApiExplorerComponent implements OnInit, OnDestroy {
   showRaw: Record<string, boolean> = {};
   toggleRaw(key: string) { this.showRaw[key] = !this.showRaw[key]; }
 
-  msClass(ms: number) { return ms < 500 ? 'ae-ms ae-ms-fast' : 'ae-ms'; }
+  msClass(ms: number) { return ms < 300 ? 'ae-ms ae-ms-fast' : ms < 1000 ? 'ae-ms' : 'ae-ms ae-ms-slow'; }
 
   get aggTableRows(): Array<{date:string;orders:number;revenue:number;cats:string}> {
     return this.aggRows.map(d => {
