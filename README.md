@@ -40,7 +40,7 @@ Production-grade **Angular 19 / TypeScript** orders dashboard with sub-second se
 │   └──────────────────────────────────────────────────────────────────┘  │
 │                              │ HTTPS (/api/*)                            │
 │   ┌──────────────────────────▼───────────────────────────────────────┐  │
-│   │  Azure Container Apps: angular-dashboard-backend                 │  │
+│   │  Azure Container Apps: angular-fastapi-dashboard-backend                 │  │
 │   │  • FastAPI (Python 3.12) — uvicorn                               │  │
 │   │  • REST: /api/orders, /api/aggregates, /api/customers, /api/regions│  │
 │   │  • 4 M+ orders, ILIKE search on search_text, pre-agg summary tables│  │
@@ -53,7 +53,7 @@ Deploy flow
 ───────────
 local machine
   ├─ angular-dashboard/scripts/deploy.sh       → Azure SWA (frontend)
-  └─ angular-dashboard-backend/scripts/deploy.sh → Azure Container Apps (API)
+  └─ angular-fastapi-dashboard-backend/scripts/deploy.sh → Azure Container Apps (API)
 ```
 
 ### Key design decisions
@@ -86,7 +86,7 @@ local machine
 | Service | Location |
 |---|---|
 | **Angular frontend** | `angular-implementations/angular-dashboard/` |
-| **FastAPI backend** | `angular-implementations/angular-dashboard-backend/` |
+| **FastAPI backend** | `angular-implementations/angular-fastapi-dashboard-backend/` |
 
 ---
 
@@ -98,8 +98,8 @@ angular-dashboard/scripts/deploy.sh      # [1] local ng serve · [2] Azure SWA
 angular-dashboard/scripts/infra-down.sh  # [1] stop local · [2] destroy Azure stack
 
 # Backend (Azure Container Apps)
-angular-dashboard-backend/scripts/deploy.sh      # [1] local uvicorn :8000 · [2] Azure Container Apps
-angular-dashboard-backend/scripts/infra-down.sh  # [1] kill :8000 · [2] destroy Azure stack
+angular-fastapi-dashboard-backend/scripts/deploy.sh      # [1] local uvicorn :8000 · [2] Azure Container Apps
+angular-fastapi-dashboard-backend/scripts/infra-down.sh  # [1] kill :8000 · [2] destroy Azure stack
 ```
 
 Deploy the FastAPI backend first, then set `apiBase` in `src/environments/environment.prod.ts` to the backend URL before deploying the frontend.
