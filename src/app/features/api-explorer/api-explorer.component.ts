@@ -68,6 +68,9 @@ async function fetchTimed(url: string): Promise<{ json: unknown; ms: number }> {
         .ae-tbl   { width:100%;border-collapse:collapse;font-size:0.6875rem;margin-top:0.5rem }
         .ae-tbl th { text-align:left;padding:0.25rem 0.625rem;color:#52525b;font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-size:0.6rem;border-bottom:1px solid rgba(255,255,255,0.06) }
         .ae-tbl td { padding:0.25rem 0.625rem;color:#a1a1aa;border-bottom:1px solid rgba(255,255,255,0.04);font-family:monospace }
+        .ae-ms     { display:inline-block;font-size:0.6875rem;font-family:monospace;padding:0.15rem 0.5rem;border-radius:0.375rem;background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.25);color:#fbbf24;letter-spacing:.02em;margin-bottom:0.4rem }
+        .ae-raw-tog { display:inline-block;font-size:0.6875rem;padding:0.2rem 0.625rem;border-radius:0.375rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.10);color:#71717a;cursor:pointer;margin-top:0.625rem;font-family:inherit;line-height:1.4 }
+        .ae-raw-tog:hover { color:#a1a1aa }
       </style>
 
       <!-- Nav -->
@@ -141,7 +144,8 @@ async function fetchTimed(url: string): Promise<{ json: unknown; ms: number }> {
               @if (orders.loading && orders.slow) { <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.6875rem;color:#71717a"><span class="ae-spinner"></span> Service may be waking up…</div> }
               @if (orders.err) { <div class="ae-err">{{ orders.err }}</div> }
               @if (orders.result && !orders.loading) {
-                <div class="ae-meta">{{ ordersLabel }} · {{ ordersMs }}ms</div>
+                <span class="ae-ms">{{ ordersMs }}ms</span>
+                <div class="ae-meta">{{ ordersLabel }}</div>
                 <table class="ae-tbl">
                   <tr><th>ID</th><th>Customer</th><th>Status</th><th>Region</th><th>Total</th><th>Placed</th></tr>
                   @for (r of ordersRows; track $index) {
@@ -155,7 +159,8 @@ async function fetchTimed(url: string): Promise<{ json: unknown; ms: number }> {
                     </tr>
                   }
                 </table>
-                <pre class="ae-raw">{{ orders.result.json | json }}</pre>
+                <button class="ae-raw-tog" (click)="toggleRaw('orders')">{{ showRaw['orders'] ? '▲ Hide raw JSON' : '▼ View raw JSON' }}</button>
+                @if (showRaw['orders']) { <pre class="ae-raw">{{ orders.result.json | json }}</pre> }
               }
             </div>
           }
@@ -180,14 +185,15 @@ async function fetchTimed(url: string): Promise<{ json: unknown; ms: number }> {
                          (keydown.enter)="runSearch()" style="width:220px" />
                   <span class="ae-param">pageSize=10</span>
                 </div>
-                <button class="ae-run" [disabled]="search.loading || !searchQ.trim()" (click)="runSearch()">
+                <button class="ae-run" [disabled]="search.loading" (click)="runSearch()">
                   @if (search.loading) { <span class="ae-spinner"></span> Running… } @else { ▶ Run }
                 </button>
               </div>
               @if (search.loading && search.slow) { <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.6875rem;color:#71717a"><span class="ae-spinner"></span> Service may be waking up…</div> }
               @if (search.err) { <div class="ae-err">{{ search.err }}</div> }
               @if (search.result && !search.loading) {
-                <div class="ae-meta">{{ searchLabel }} · {{ searchMs }}ms</div>
+                <span class="ae-ms">{{ searchMs }}ms</span>
+                <div class="ae-meta">{{ searchLabel }}</div>
                 <table class="ae-tbl">
                   <tr><th>ID</th><th>Customer</th><th>Status</th><th>Region</th><th>Total</th><th>Placed</th></tr>
                   @for (r of searchRows; track $index) {
@@ -202,7 +208,8 @@ async function fetchTimed(url: string): Promise<{ json: unknown; ms: number }> {
                   }
                 </table>
                 @if (searchRows.length === 0) { <p style="font-size:.75rem;color:#71717a">No results.</p> }
-                <pre class="ae-raw">{{ search.result.json | json }}</pre>
+                <button class="ae-raw-tog" (click)="toggleRaw('search')">{{ showRaw['search'] ? '▲ Hide raw JSON' : '▼ View raw JSON' }}</button>
+                @if (showRaw['search']) { <pre class="ae-raw">{{ search.result.json | json }}</pre> }
               }
             </div>
           }
@@ -236,7 +243,8 @@ async function fetchTimed(url: string): Promise<{ json: unknown; ms: number }> {
               @if (agg.loading && agg.slow) { <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.6875rem;color:#71717a"><span class="ae-spinner"></span> Service may be waking up…</div> }
               @if (agg.err) { <div class="ae-err">{{ agg.err }}</div> }
               @if (agg.result && !agg.loading) {
-                <div class="ae-meta">{{ aggRows.length }} day{{ aggRows.length !== 1 ? 's' : '' }} · {{ aggFrom }} → {{ aggTo }} · {{ aggMs }}ms</div>
+                <span class="ae-ms">{{ aggMs }}ms</span>
+                <div class="ae-meta">{{ aggRows.length }} day{{ aggRows.length !== 1 ? 's' : '' }} · {{ aggFrom }} → {{ aggTo }}</div>
                 <div style="display:flex;gap:1rem;margin-bottom:0.75rem">
                   <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:0.5rem;padding:0.5rem 1rem;text-align:center">
                     <div style="font-size:1.125rem;font-weight:700;color:#f4f4f5">{{ aggOrders | number }}</div>
@@ -247,7 +255,8 @@ async function fetchTimed(url: string): Promise<{ json: unknown; ms: number }> {
                     <div style="font-size:0.625rem;color:#52525b;text-transform:uppercase;letter-spacing:.06em">Est. Revenue</div>
                   </div>
                 </div>
-                <pre class="ae-raw">{{ agg.result.json | json }}</pre>
+                <button class="ae-raw-tog" (click)="toggleRaw('agg')">{{ showRaw['agg'] ? '▲ Hide raw JSON' : '▼ View raw JSON' }}</button>
+                @if (showRaw['agg']) { <pre class="ae-raw">{{ agg.result.json | json }}</pre> }
               }
             </div>
           }
@@ -279,7 +288,8 @@ async function fetchTimed(url: string): Promise<{ json: unknown; ms: number }> {
               @if (cust.loading && cust.slow) { <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.6875rem;color:#71717a"><span class="ae-spinner"></span> Service may be waking up…</div> }
               @if (cust.err) { <div class="ae-err">{{ cust.err }}</div> }
               @if (cust.result && !cust.loading) {
-                <div class="ae-meta">{{ custRows.length }} customer{{ custRows.length !== 1 ? 's' : '' }} returned · {{ custMs }}ms</div>
+                <span class="ae-ms">{{ custMs }}ms</span>
+                <div class="ae-meta">{{ custRows.length }} customer{{ custRows.length !== 1 ? 's' : '' }} returned</div>
                 <table class="ae-tbl">
                   <tr><th>ID</th><th>Name</th><th>Email</th><th>Region</th></tr>
                   @for (r of custRows; track $index) {
@@ -292,7 +302,8 @@ async function fetchTimed(url: string): Promise<{ json: unknown; ms: number }> {
                   }
                 </table>
                 @if (custRows.length === 0) { <p style="font-size:.75rem;color:#71717a">No results.</p> }
-                <pre class="ae-raw">{{ cust.result.json | json }}</pre>
+                <button class="ae-raw-tog" (click)="toggleRaw('cust')">{{ showRaw['cust'] ? '▲ Hide raw JSON' : '▼ View raw JSON' }}</button>
+                @if (showRaw['cust']) { <pre class="ae-raw">{{ cust.result.json | json }}</pre> }
               }
             </div>
           }
@@ -322,7 +333,8 @@ async function fetchTimed(url: string): Promise<{ json: unknown; ms: number }> {
               @if (regions.loading && regions.slow) { <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.6875rem;color:#71717a"><span class="ae-spinner"></span> Service may be waking up…</div> }
               @if (regions.err) { <div class="ae-err">{{ regions.err }}</div> }
               @if (regions.result && !regions.loading) {
-                <div class="ae-meta">{{ regionRows.length }} region{{ regionRows.length !== 1 ? 's' : '' }} returned · {{ regionsMs }}ms</div>
+                <span class="ae-ms">{{ regionsMs }}ms</span>
+                <div class="ae-meta">{{ regionRows.length }} region{{ regionRows.length !== 1 ? 's' : '' }} returned</div>
                 <div style="display:flex;flex-wrap:wrap;gap:0.375rem;margin-bottom:0.75rem">
                   @for (r of regionRows; track $index) {
                     <span style="font-size:0.6875rem;padding:0.2rem 0.6rem;border-radius:9999px;background:rgba(129,140,248,0.10);border:1px solid rgba(129,140,248,0.25);color:#a5b4fc">
@@ -330,7 +342,8 @@ async function fetchTimed(url: string): Promise<{ json: unknown; ms: number }> {
                     </span>
                   }
                 </div>
-                <pre class="ae-raw">{{ regions.result.json | json }}</pre>
+                <button class="ae-raw-tog" (click)="toggleRaw('regions')">{{ showRaw['regions'] ? '▲ Hide raw JSON' : '▼ View raw JSON' }}</button>
+                @if (showRaw['regions']) { <pre class="ae-raw">{{ regions.result.json | json }}</pre> }
               }
             </div>
           }
@@ -361,6 +374,9 @@ export class ApiExplorerComponent implements OnInit, OnDestroy {
 
   expanded: Record<string, boolean> = {};
   toggle(key: string) { this.expanded[key] = !this.expanded[key]; }
+
+  showRaw: Record<string, boolean> = {};
+  toggleRaw(key: string) { this.showRaw[key] = !this.showRaw[key]; }
 
   // Inputs
   searchQ = '';
