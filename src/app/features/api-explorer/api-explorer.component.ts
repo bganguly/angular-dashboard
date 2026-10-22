@@ -4,6 +4,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 const SLOW_WAKING_MS = 800;
 const READY_DISMISS_MS = 1200;
@@ -349,7 +350,7 @@ export class ApiExplorerComponent implements OnInit, OnDestroy {
       }, 100);
     }, SLOW_WAKING_MS);
 
-    this.http.get('/api/orders?pageSize=10&sort=placedAt&dir=desc').subscribe({
+    this.http.get(`${environment.apiBase}/api/orders?pageSize=10&sort=placedAt&dir=desc`).subscribe({
       next: () => this.markReady(),
       error: () => this.markReady(),
     });
@@ -377,7 +378,7 @@ export class ApiExplorerComponent implements OnInit, OnDestroy {
   async runOrders() {
     this.orders = { loading: true, slow: maybeAsleep(), result: null, err: null };
     try {
-      const r = await fetchTimed('/api/orders?pageSize=10&sort=placedAt&dir=desc');
+      const r = await fetchTimed(`${environment.apiBase}/api/orders?pageSize=10&sort=placedAt&dir=desc`);
       this.orders = { loading: false, slow: false, result: r, err: null };
     } catch (e) {
       this.orders = { loading: false, slow: false, result: null, err: String(e) };
@@ -388,7 +389,7 @@ export class ApiExplorerComponent implements OnInit, OnDestroy {
     if (!this.searchQ.trim()) return;
     this.search = { loading: true, slow: maybeAsleep(), result: null, err: null };
     try {
-      const r = await fetchTimed('/api/orders?q=' + encodeURIComponent(this.searchQ.trim()) + '&pageSize=10');
+      const r = await fetchTimed(`${environment.apiBase}/api/orders?q=` + encodeURIComponent(this.searchQ.trim()) + '&pageSize=10');
       this.search = { loading: false, slow: false, result: r, err: null };
     } catch (e) {
       this.search = { loading: false, slow: false, result: null, err: String(e) };
@@ -399,7 +400,7 @@ export class ApiExplorerComponent implements OnInit, OnDestroy {
     if (!this.aggFrom || !this.aggTo) return;
     this.agg = { loading: true, slow: maybeAsleep(), result: null, err: null };
     try {
-      const r = await fetchTimed(`/api/aggregates?from=${this.aggFrom}&to=${this.aggTo}&topCategories=3`);
+      const r = await fetchTimed(`${environment.apiBase}/api/aggregates?from=${this.aggFrom}&to=${this.aggTo}&topCategories=3`);
       this.agg = { loading: false, slow: false, result: r, err: null };
     } catch (e) {
       this.agg = { loading: false, slow: false, result: null, err: String(e) };
@@ -409,7 +410,7 @@ export class ApiExplorerComponent implements OnInit, OnDestroy {
   async runCustomers() {
     this.cust = { loading: true, slow: maybeAsleep(), result: null, err: null };
     try {
-      const url = '/api/customers?limit=10' + (this.custQ.trim() ? '&q=' + encodeURIComponent(this.custQ.trim()) : '');
+      const url = `${environment.apiBase}/api/customers?limit=10` + (this.custQ.trim() ? '&q=' + encodeURIComponent(this.custQ.trim()) : '');
       const r = await fetchTimed(url);
       this.cust = { loading: false, slow: false, result: r, err: null };
     } catch (e) {
@@ -420,7 +421,7 @@ export class ApiExplorerComponent implements OnInit, OnDestroy {
   async runRegions() {
     this.regions = { loading: true, slow: maybeAsleep(), result: null, err: null };
     try {
-      const r = await fetchTimed('/api/regions');
+      const r = await fetchTimed(`${environment.apiBase}/api/regions`);
       this.regions = { loading: false, slow: false, result: r, err: null };
     } catch (e) {
       this.regions = { loading: false, slow: false, result: null, err: String(e) };
