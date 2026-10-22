@@ -1,4 +1,4 @@
-# angular-dashboard — Angular 19 + FastAPI + Azure
+# fastapi-angular-dashboard-frontend — Angular 19 + FastAPI + Azure
 
 Production-grade **Angular 19 / TypeScript** orders dashboard with sub-second search and chart responses across 4 M+ orders. The Angular SPA is deployed to **Azure Static Web Apps**; the REST API is a **Python FastAPI** backend deployed to **Azure Container Apps**.
 
@@ -34,13 +34,13 @@ Production-grade **Angular 19 / TypeScript** orders dashboard with sub-second se
 │                                                                          │
 │   Azure Static Web Apps                                                  │
 │   ┌──────────────────────────────────────────────────────────────────┐  │
-│   │  angular-dashboard (SWA)                                         │  │
+│   │  fastapi-angular-dashboard-frontend (SWA)                                         │  │
 │   │  • Compiled Angular SPA served from Azure CDN                    │  │
 │   │  • Free tier — always-on, global edge                            │  │
 │   └──────────────────────────────────────────────────────────────────┘  │
 │                              │ HTTPS (/api/*)                            │
 │   ┌──────────────────────────▼───────────────────────────────────────┐  │
-│   │  Azure Container Apps: angular-fastapi-dashboard-backend                 │  │
+│   │  Azure Container Apps: fastapi-dashboard-backend                 │  │
 │   │  • FastAPI (Python 3.12) — uvicorn                               │  │
 │   │  • REST: /api/orders, /api/aggregates, /api/customers, /api/regions│  │
 │   │  • 4 M+ orders, ILIKE search on search_text, pre-agg summary tables│  │
@@ -52,8 +52,8 @@ Production-grade **Angular 19 / TypeScript** orders dashboard with sub-second se
 Deploy flow
 ───────────
 local machine
-  ├─ angular-dashboard/scripts/deploy.sh       → Azure SWA (frontend)
-  └─ angular-fastapi-dashboard-backend/scripts/deploy.sh → Azure Container Apps (API)
+  ├─ fastapi-angular-dashboard-frontend/scripts/deploy.sh       → Azure SWA (frontend)
+  └─ fastapi-dashboard-backend/scripts/deploy.sh → Azure Container Apps (API)
 ```
 
 ### Key design decisions
@@ -85,8 +85,8 @@ local machine
 
 | Service | Location |
 |---|---|
-| **Angular frontend** | `angular-implementations/angular-dashboard/` |
-| **FastAPI backend** | `angular-implementations/angular-fastapi-dashboard-backend/` |
+| **Angular frontend** | `angular-implementations/fastapi-angular-dashboard-frontend/` |
+| **FastAPI backend** | `angular-implementations/fastapi-dashboard-backend/` |
 
 ---
 
@@ -94,12 +94,12 @@ local machine
 
 ```bash
 # Frontend (Azure Static Web Apps)
-angular-dashboard/scripts/deploy.sh      # [1] local ng serve · [2] Azure SWA
-angular-dashboard/scripts/infra-down.sh  # [1] stop local · [2] destroy Azure stack
+fastapi-angular-dashboard-frontend/scripts/deploy.sh      # [1] local ng serve · [2] Azure SWA
+fastapi-angular-dashboard-frontend/scripts/infra-down.sh  # [1] stop local · [2] destroy Azure stack
 
 # Backend (Azure Container Apps)
-angular-fastapi-dashboard-backend/scripts/deploy.sh      # [1] local uvicorn :8000 · [2] Azure Container Apps
-angular-fastapi-dashboard-backend/scripts/infra-down.sh  # [1] kill :8000 · [2] destroy Azure stack
+fastapi-dashboard-backend/scripts/deploy.sh      # [1] local uvicorn :8000 · [2] Azure Container Apps
+fastapi-dashboard-backend/scripts/infra-down.sh  # [1] kill :8000 · [2] destroy Azure stack
 ```
 
 Deploy the FastAPI backend first, then set `apiBase` in `src/environments/environment.prod.ts` to the backend URL before deploying the frontend.

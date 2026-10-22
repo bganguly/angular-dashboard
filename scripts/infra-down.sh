@@ -7,7 +7,7 @@ INFRA_DIR="$ROOT_DIR/infra"
 # ── Destroy ───────────────────────────────────────────────────────────────────
 
 _main() {
-  printf '\nThis will DESTROY all Azure resources for angular-dashboard.\n'
+  printf '\nThis will DESTROY all Azure resources for fastapi-angular-dashboard-frontend.\n'
   printf 'Continue? [y/N]: '
   read -r _CONFIRM
   [[ "$_CONFIRM" =~ ^[Yy] ]] || { printf 'Aborted.\n'; exit 0; }
